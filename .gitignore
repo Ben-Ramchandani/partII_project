@@ -1,0 +1,9 @@
+bin/
+test_files/
+
+#Eclipse
+.project
+
+#Vim
+*.swp
+
