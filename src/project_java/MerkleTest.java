@@ -1,7 +1,6 @@
 package project_java;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -15,9 +14,9 @@ import org.junit.Test;
 
 public class MerkleTest {
 
-	public static final String TEST_FILE_PATH = "test_dir/";
+	public static final String TEST_FILE_PATH = "test_files/";
 	public BlockStream b;
-	
+
 	@BeforeClass
 	public static void setUp() {
 		(new File(TEST_FILE_PATH)).mkdir();
@@ -136,5 +135,60 @@ public class MerkleTest {
 		byte[] manualProof3 = Util.byteCombine(new byte[2], Util.hash(Util.byteCombine("e".getBytes(), new byte[1])),
 				hashLeft);
 		assertTrue(Arrays.equals(m.proof(3), manualProof3));
+	}
+
+	@Test
+	public void testValidate() throws Exception {
+		String testString = "a";
+		PrintWriter writer = new PrintWriter(TEST_FILE_PATH + "file.txt", "UTF-8");
+		writer.print(testString);
+		writer.close();
+		this.b = new BlockStream(Paths.get(TEST_FILE_PATH + "file.txt"), 1);
+		Merkle m = new Merkle(this.b);
+		byte[] proof = m.proof(0);
+		byte[] rootHash = m.rootHash();
+		assertTrue(m.validateProof(rootHash, proof, 0));
+		proof[0] = "b".getBytes()[0];
+		assertFalse(m.validateProof(rootHash, proof, 0));
+	}
+
+	@Test
+	public void testSmallValidate() throws Exception {
+		String testString = "ab";
+		PrintWriter writer = new PrintWriter(TEST_FILE_PATH + "file.txt", "UTF-8");
+		writer.print(testString);
+		writer.close();
+		this.b = new BlockStream(Paths.get(TEST_FILE_PATH + "file.txt"), 1);
+		Merkle m = new Merkle(this.b);
+		byte[] proof = m.proof(0);
+		byte[] rootHash = m.rootHash();
+		assertTrue(m.validateProof(rootHash, proof, 0));
+		proof[32]++;
+		assertFalse(m.validateProof(rootHash, proof, 0));
+		proof = m.proof(1);
+		assertTrue(m.validateProof(rootHash, proof, 1));
+		assertFalse(m.validateProof(rootHash, proof, 0));
+	}
+
+	@Test
+	public void testLargeValidate() throws Exception {
+		String testString = "abcdefghijklmnopqrstuvwxyz";
+		PrintWriter writer = new PrintWriter(TEST_FILE_PATH + "file.txt", "UTF-8");
+		writer.print(testString);
+		writer.close();
+		this.b = new BlockStream(Paths.get(TEST_FILE_PATH + "file.txt"), 3);
+		Merkle m = new Merkle(this.b);
+		byte[] proof = m.proof(0);
+		byte[] rootHash = m.rootHash();
+		for (int i = 0; i < m.fileBlocks; i++) {
+			proof = m.proof(i);
+			for (int j = 0; j < m.fileBlocks; j++) {
+				if (i == j) {
+					assertTrue(m.validateProof(rootHash, proof, j));
+				} else {
+					assertFalse(m.validateProof(rootHash, proof, j));
+				}
+			}
+		}
 	}
 }

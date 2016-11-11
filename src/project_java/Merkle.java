@@ -19,6 +19,7 @@ public final class Merkle {
 	public final int depth;
 	public final long fileBlocks;
 	public final long totalBlocks;
+	public final int hashLength = 32; // 256 bits
 
 	public byte[] rootHash() throws IOException {
 		this.in.reset();
@@ -38,7 +39,7 @@ public final class Merkle {
 		assert (i >= 0 && i < this.fileBlocks);
 		this.in.reset();
 		byte[] proof = this.proofr(this.depth, this.totalBlocks, i);
-		assert (proof.length == this.blockSize + 32 * this.depth);
+		assert (proof.length == this.blockSize + this.hashLength * this.depth);
 		return proof;
 	}
 
@@ -60,19 +61,19 @@ public final class Merkle {
 	}
 
 	public boolean validateProof(byte[] rootHash, byte[] proof, int i) {
-		assert (proof.length == this.blockSize + 32 * this.depth);
-		byte[] fileBlock = new byte[this.blockSize];
-		System.arraycopy(proof, 0, fileBlock, 0, this.blockSize);
+		assert (proof.length == this.blockSize + this.hashLength * this.depth);
+		byte[] hash = Util.hash(Util.slice(proof, 0, this.blockSize));
 
-		byte[] hash = Util.hash(fileBlock);
+		int proofPosition = this.blockSize;
 		for (int n = 0; n < this.depth; n++) {
-			byte[] otherHash = Util.slice(proof, this.blockSize, 32);
+			byte[] otherHash = Util.slice(proof, proofPosition, proofPosition + this.hashLength);
 			if (i % 2 == 0) { // We have the left hash.
 				hash = Util.hash(Util.byteCombine(hash, otherHash));
 			} else {
 				hash = Util.hash(Util.byteCombine(otherHash, hash));
 			}
 			i /= 2;
+			proofPosition += this.hashLength;
 		}
 		return Arrays.equals(hash, rootHash);
 	}

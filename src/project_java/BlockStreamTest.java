@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class BlockStreamTest {
 
-	public static final String TEST_FILE_PATH = "";
+	public static final String TEST_FILE_PATH = "test_files/";
 	public static final String testString = "abcdefghijklmnopqrstuvwxyz";
 	public static final int blockSize = 10;
 
