@@ -1,0 +1,128 @@
+\documentclass[oneside]{article}
+
+\textwidth=460pt
+\textheight=680pt
+\marginparwidth=51pt
+\hoffset=-1in
+\voffset=-1in
+
+\setlength{\parindent}{0pt}
+
+\usepackage{graphicx}
+\usepackage{enumerate}
+
+\title{
+{\Large Computer Science Tripos -- Part II}\\
+\vspace{1em}
+Incentivising distributed file storage using blockchain contracts.\\
+Design documentation.}
+\author{Ben Ramchandani \\ bjr39@cam.ac.uk \\ St. Catharine's College}
+
+\begin{document}
+\maketitle
+
+\textbf{Supervisor}: John Knox\\
+\textbf{Director of Studies}: Dr Sergei Taraskin\\
+\textbf{Project Overseers}: I. Wassell, L. Paulson\\
+\textbf{Originator}: Ben Ramchandani
+
+\section{File disimentation}
+
+The file will be split into small blocks of size 1024kb.
+It is one of these blocks that will be selected for the proof of retrieveability.
+
+\section{Merkle tree}
+
+For the purposes of Merkle tree construction the file will be zero padded up such that the number of blocks required is a power of two.
+The number of leaves in the Merkle tree will therefore be a power of 2, and the size of the proof will therefore be the same regardless of which block of the file is selected.
+
+I will write a Merkle tree implementation in Java, with the following functionality:
+
+Given a file, it will zero pad the file as described above, before splitting it into blocks and building a Merkle tree.
+It will then output $H$, the root hash of this tree.
+
+\section{Proof generation}
+
+Another Java program.
+This one takes a file and a number $i$ of one of the blocks in the file (not the padding blocks) and outputs a proof of the form
+\begin{verbatim}[FILE BLOCK 1024 BYTES #######] || [SHA256] || [SHA256] ...\end{verbatim}
+where there are $\log_2(\texttt{num\_blocks})$ SHA256 hashes.
+This proof will therefore have a size of $1024 + \log_2(\texttt{num\_blocks}) \times 32$ bytes.
+Note that no bounding markers are needed due to the fixed size.
+
+\section{Contract}
+
+The contract needs to store the following values:
+\begin{itemize}
+\item $T_0$, the number of the blockchain block the contract was initialised on.
+\item $N$, the number of blockchain blocks the contract should wait.
+\item $m$, the number of blocks in the file (before zero-padding).
+\item $H$, the Merkle tree root hash.
+\item $X$, the amount of ether to pay out.
+\end{itemize}
+
+When the contract is called with a proof it should calculate an $0 \leq i < m$ from the hash of block $T_0 + N$ then check the following statements.
+If any of them are true the contract should `throw`, aborting the transaction.
+\begin{itemize}
+\item The contract has already paid out.
+\item $i \geq T_0 + N$. 
+\item $i < T_0 + N + 256$ (if this is the case the block hash is no longer available).
+\item Proof is invalid.
+\end{itemize}
+
+
+\section{Proof construction algorithm}
+
+\begin{verbatim}
+input int i; // Block number
+input int m; // Total number of blocks in file (unpadded)
+input Node root; // Merkle tree root
+input MTree root;
+let M = 2^(ceil(log2(m)));
+let j = 1024 + log2(M) * 32;
+let p = byte[j];
+x = M / 2;
+node = root;
+while(x > 1) {
+    if (i < x) {
+        p[j - 32, j] = SHA256(root.right);
+        node = node.left;
+        x = x / 2;
+    } else {
+        p[j - 32, j] = SHA256(root.left);
+        node = node.right;
+        x = x + x / 2;
+    }
+    j -= 32
+}
+assert(j == 1024);
+assert(node is leaf);
+p[0, 1024] = SHA256(node);
+return p;
+\end{verbatim}
+
+\section{Proof validation algorithm}
+
+\begin{verbatim}
+input int m; // Total number of blocks in file (unpadded)
+input int H; // Merkle tree root hash.
+input byte[] proof; // The proof.
+let i = blockhash(T_0 + N) % m; // i Is the block required for the proof.
+let h = SHA256(proof[0, 1024]);
+let M = 2^(ceil(log2(m)));
+let j = 1024;
+let c = 0;
+while(c < M) {
+    // Is the cth bit of i 0? Reconstruct the tree branching bottom up. 
+    if(i & (1 << c) == 0) { // Assuming big endian, need to check what the EVM uses.
+        h = SHA256(h | proof[j, 256]); // here | denotes concatenation.
+    } else {
+        h = SHA256(proof[j, 256] | h);
+    }
+    c += 1;
+    j += 256;
+}
+return h == H;
+\end{verbatim}
+
+\end{document}

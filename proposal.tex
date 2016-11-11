@@ -1,0 +1,280 @@
+\documentclass[oneside]{article}
+
+\textwidth=460pt
+\textheight=680pt
+\marginparwidth=51pt
+\hoffset=-1in
+\voffset=-1in
+
+\setlength{\parindent}{0pt}
+
+\usepackage{graphicx}
+\usepackage{enumerate}
+
+\title{
+{\Large Computer Science Tripos -- Part II -- Project Proposal}\\
+\vspace{1em}
+Incentivising distributed file storage using blockchain contracts.}
+\author{Ben Ramchandani \\ bjr39@cam.ac.uk \\ St. Catharine's College}
+
+\begin{document}
+\maketitle
+
+\textbf{Supervisor}: John Knox\\
+\textbf{Director of Studies}: Dr Sergei Taraskin\\
+\textbf{Project Overseers}: I. Wassell, L. Paulson\\
+\textbf{Originator}: Ben Ramchandani
+
+
+\section{Introduction}
+
+I aim to create a method for users to compensate nodes in a distributed system for storing data on their behalf, using blockchain contracts.
+
+\subsection{Background}
+\subsubsection{Ethereum}
+
+Bitcoin is the first and most famous currency based on a blockchain, a distributed database consisting of a growing list of blocks which resist changes to their history.
+Ethereum is a system based on a blockchain similar to Bitcoin, though it has some important differences, in particular it allows for more powerful smart contracts.
+
+\subsubsection{Smart contracts}
+
+Ethereum allows a Turing complete bytecode to execute as part of the block verification process.
+These code controlled wallets are referred to as smart contracts.
+These contracts can own and pay out \textit{ether}, the base currency of Ethereum. 
+Since the blockchain is a public ledger all code and information stored in smart contracts is accessible to all nodes.
+The code may use the current block hash as a source of randomness.
+To prevent abuse there is a fee for each execution step a contract takes, as well as for all data processed or stored on the blockchain.
+
+\subsubsection{Proof of retrievability}
+
+A proof of retrievability is a proof that one has access to a file.
+
+In our case the proof is probabilistic, only knowledge of a subset of the file needs to be demonstrated.
+The part of the file required for the proof cannot be known ahead of time or the prover can cheat by only storing the relevant part of the file.
+In our case a selection of part of the file based on the current Ethereum block hash has this property.
+
+The entity requiring the proof is a smart contract, which means that it does not have access to the file and any information it holds is public.
+
+The method I intend to use splits the file into blocks and uses a Merkle tree proof of membership[6] for a random block.
+
+\subsection{Summary}
+
+I aim to implement a scheme using blockchain smart contracts to pay nodes that store files on your behalf for a given amount of time.
+This will involve implementing a proof of retrievability in a blockchain contract and code to interact with the contract.
+The original idea for this appears in the Ethereum White Paper. [1]
+To the best of my knowledge this idea has never been implemented, though systems exist that implement similar schemes.
+
+\section{Starting point}
+
+I will build this on top of existing Ethereum implementations, using these to interface with the blockchain.
+I have not done and do not intend to use any pre-existing work as part of my submission.
+
+\subsection{Prior work}
+Swarm is an distributed file system that uses Ethereum to pay nodes to send data. Every pair of nodes has a balance between them, if one node is sending more data than it is receiving above some threshold this difference must be paid for in ether or the nodes will stop communicating. [2]\\
+
+Filecoin is an unimplemented idea for a distributed file system based on a custom blockchain in which proof of retrievability is used as part of the mining process. [3]\\
+
+Stroj implements a scheme similar to the idea presented here, it is a distributed file system based on a custom blockchain. Merkle tree based proofs of retrievability are used, but they are issued directly by the client that uploaded the files rather than from contracts on the blockchain. [4]
+
+\section{Resource declaration}
+
+Hardware:
+
+\begin{itemize}
+\item Personal desktop (i3-4330, 8GB RAM, GTX 760, (Win 10, Ubuntu))
+\item Personal laptop (i3-380M, 8GB RAM, LUbuntu)
+\end{itemize}
+I accept full responsibility for these machines and I have made contingency plans to protect myself against hardware and/or software failure.\\
+In the event my personal computers fail I will use the MCS machines.\\
+Backup will be to Github and periodically to my user space on MCS.\\
+
+Other resources:\\
+
+I would like to test the contract on a live blockchain, though development work can be done on a private (local) blockchain.
+There is a test network (called ``Morden") for Ethereum intended for testing smart contracts, I will to use this to test my project so I am listing it as a dependency here.
+
+Running these tests will cost a small amount of Ether in transaction costs, but it is still possible to mine ether at a reasonable rate on a normal CPU in the test network.
+
+In the event that this blockchain is unavailable I would still be able to complete my project on an entirely private blockchain.
+
+\section{Work to be done}
+
+\subsection{Outline of work}
+\begin{enumerate}
+\item Implement a program to take an arbitrary file, split it into blocks and build a Merkle tree of those blocks.
+
+\item Implement a template for an Ethereum smart contract that, for a given file, has the following behaviour:
+After $N$ blocks have been placed on the blockchain, pay $X$ ether to the first node that gives a Merkle tree proof that it holds the file.
+
+\item Implement a program that can generate the required proof.
+
+\item Analysis of the system as described in section 5.
+\end{enumerate}
+
+\subsection{Details of contract functionality}
+
+The contract is parameterized on several values:
+\begin{itemize}
+\item $H$, the Merkle tree root hash of the file.
+\item $m$, the number of blocks in the file.
+\item $N$, the number of blockchain blocks to wait for until the reward can be claimed.
+\item $X$, the amount of ether to give out as this reward.
+\end{itemize}
+
+After waiting the $N$ blocks it will start accepting proofs based on a number $0 \leq i < m$ derived from the hash of this block.
+The storing node will also compute $i$ based on the block hash.
+The storing node will create a message to the contract containing the $i$th block of the file and a list of the hashes required to prove membership of the Merkle tree.
+The storing node will place this message on the block chain.
+The contract will execute, hashing the block given and checking the Merkle tree proof against $H$.
+If the proof is correct the contract will then send $X$ ether to the node's Ethereum address.
+Other nodes later sending the same proof will get nothing.
+If the file owner wishes the file to persist on the network after the original contract expires they should place another similar contract on the blockchain shortly before hand.
+The hash of a block is only available for the next 256 blocks, so this places a limit on the length of time rewards will be available to be claimed.\\
+
+This system does not guarantee that the file will actually be stored in the first place, it only gives nodes an incentive to do so.
+This is inevitable to some extent due to the nature of distributed systems, though I mention possible extensions that could improve confidence below.\\
+
+If there is a bug in the contract code it could leave one vulnerable to the loss of the $X$ ether stored by the contract.
+Whilst I will try to make the code secure, a proof of correctness or thorough security analysis is out of scope for this project.\\
+
+The proposed Merkle tree proof uses log(number\_of\_blocks) + file\_size/number\_of\_blocks space and time to verify, which,
+given a fixed block size, grows logarithmically with the size of the file.
+The current contract computation step and transaction size limits should not impose any practical limit on the size of a file a contract can pertain to.
+
+\subsubsection{Transaction cost calculation}
+This is a back of the envelope calculation to demonstrate the feasibility of this project and is not expected to accurate.
+The Ethereum unit of computation is `gas'. One gas currently costs about 0.1 micro-ether, or 1.2 micro-USD.
+Details of transaction costs and mechanics are available in the Ethereum Yellow Paper [7].
+
+Each step in the Merkle tree verification procedure requires a 256bit (32 byte) hash.
+Given a file block size of 1024 bytes, a proof of retrievability for a file of size $s$ bytes has size $1024 + 32 \times \log(\lceil \frac{s}{1024}\rceil)$ bytes.
+For a 1 terabyte file this is just under 2kb, well under the transaction size limit of $\approx 40$kb and with a gas cost of $5 \times 1984 = 9,920$.
+For this file 31 SHA256 invocations would be required to verify the proof. Ethereum provides the SHA256 hash function as part of its language at a gas cost of $\approx 200$.
+This leaves the total gas cost at approximately 20,000, or about 0.024USD and well below the current gas limit of 500,000.
+
+
+\section{Success criteria}
+
+A working implementation of the system described in the previous section.\\
+
+An analysis of the system, including:
+\begin{itemize}
+\item An analysis of relationship between block size, the number of blocks used in the proof, transaction costs and security.
+\item Analysis of the security of the system, pointing out any potential flaws or issues I find during implementation, though doing a rigorous security analysis is out of scope.
+\item A comparison with existing and planned file storage systems.
+\end{itemize}
+
+%%%
+
+
+
+
+%%%
+
+\section{Possible extensions}
+
+More efficient algorithms exist for public proofs of retrievability than the Merkle tree based one I intend to use [5].
+These algorithms do not involve sending the block of the file we wish to verify, just fixed length numbers.
+This could reduce the transaction cost associated with the contract and improve the security (the amount of the file the node must hold to pass the test) of the verification.
+A simpler improvement would be to require multiple blocks in the Merkle tree proof, though this would increase the transaction cost.\\
+
+Analyse and implement ways for nodes to decide what files they should store.
+Clearly as more files are added to the network it would become impractical for all nodes to store every file.
+For example, they could only store files that have a hash which is in some sense close to their own node ID.\\
+
+As mentioned previously the system does not give a strong guarantee that the file has been stored.
+Erasure codes (also known as Forward Error Correction) could be added to the files before they are distributed to the network.
+This would mean that the file could still be recovered if some blocks were lost or corrupted.\\
+
+Another way to improve confidence in the system would be to require nodes that intend to store a file to lock in funds to the contract before some time $N' < N$.
+The contract would then consider proofs of retrievability invalid unless they originate from one of these nodes.
+The contract would then return these funds, with interest, once the proof is received.
+In addition this gives nodes an incentive to store files in their entirety, as they stand to lose if they cannot produce the proof when requested.\\
+
+A time-out could be included in the contract wherein if the reward has not been claimed some number of blocks after it became available the ether held can be reclaimed by the contract owner.
+\section{Timetable}
+
+There are three main components that must be implemented:
+\begin{itemize}
+\item The file processor. This splits a file into blocks and builds a Merkle tree of those blocks.
+\item The contract, described in section 4.2. I have no experience with contract creation, so I leave extra time in case unexpected problems occur during implementation.
+\item The proof generator. I will develop this in tandem with the contract as they are needed to test each other.
+This component should be able to share code for handling Merkle trees with the file processor.
+\end{itemize}
+
+I plan to use Solidity for the contract and Java for the other components.
+
+\begin{enumerate}
+\item \textbf{Michaelmas weeks 2-4} Learn to use Solidity, a language which compiles to Ethereum's blockchain code.
+Set up development environment for Ethereum.
+Planning work, including a high level design of each component (file processor, contract, proof generator) and the interactions between them.
+
+Deliverable: High level design information.
+
+\item \textbf{Michaelmas weeks 5-6} Build a program that takes a file, splits it into blocks and builds a Merkle tree from those blocks.
+
+Create a Merkle tree library that can: 
+\begin{itemize}
+\item generate Merkle trees,
+\item produce logarithmic proofs of membership of these trees.
+\end{itemize}
+Create a program to read in files, split them into fixed size blocks with padding if necessary and create a Merkle tree of those blocks.
+
+I do this first so I will have something to test the contract implementation with.
+
+Deliverable: File processor.
+
+\item \textbf{Michaelmas weeks 7-8} Begin the implementation of the contract and proof generator.
+
+By the end of Michaelmas I aim to have a skeleton contract that can:
+\begin{itemize}
+\item check whether this contract has already paid out its ether,
+\item check if the current block number exceeds some $N$,
+\item select an integer in a range $0..m$ based on the hash of a specific block,
+\item pay ether to the address that a message originates from.
+\end{itemize}
+
+Only the proof verification function should be missing.
+
+\item \textbf{Michaelmas vacation} Complete the work started at the end of Michaelmas.
+
+First I will create a program that, given a file of $m$ blocks and an integer $0 \leq i < m$ produces a Merkle tree proof of membership of block $i$ of the file.
+
+I will then implement the proof of membership verification in the contract.
+
+By the end of the Christmas vacation I aim to have completed the implementation part of the project to a demonstrably working state, though code clean-up and testing may take longer.
+I've put this early in the project time-line to leave extra time in case unexpected problems with implementing the contract (or the other components), which can spill into Lent term without jeopardizing the project.
+If I do finish by the start of term as planned this leaves time for testing and extensions, of which several seem interesting.
+
+Deliverable: Contract and proof generator.
+
+\item \textbf{Lent weeks 0-2} Write progress report.
+
+Deliverable: Progress report.
+\item \textbf{Lent weeks 3-5} Begin evaluation and extensions if possible.
+
+My intention is to finish all coding by this point (Lent week 5), including extensions.
+This gives me time to write the dissertation and revise for the exams.
+This point onwards should be evaluation and dissertation work.
+
+Deliverable: Completed code.
+
+\item \textbf{Lent weeks 6-8} Begin writing dissertation and complete evaluation.
+\item \textbf{Easter vacation} Complete dissertation.
+\item \textbf{Easter term} Proof reading and submission.
+\end{enumerate}
+
+
+I plan to have weekly meetings with my supervisor via video call.
+\section{Links}
+
+\begin{enumerate}
+\item Ethereum White Paper -- https://github.com/ethereum/wiki/wiki/White-Paper
+\item Swarm, Ethersphere Orange Papers series -- http://swarm-gateways.net/bzz:/swarm/ethersphere/orange-papers/1/sw\%5E3.pdf
+\item Filecoin White Paper -- http://filecoin.io/filecoin.pdf
+\item Storj White Paper -- https://storj.io/storj.pdf
+\item Shacham and Waters, Compact Proofs of Retrievability -- https://cseweb.ucsd.edu/~hovav/dist/verstore.pdf
+\item Merkle trees and proof of membership -- https://en.wikipedia.org/wiki/Merkle\_tree
+\item Ethereum Yellow Paper -- http://gavwood.com/paper.pdf
+\end{enumerate}
+\end{document}

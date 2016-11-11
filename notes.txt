@@ -1,0 +1,80 @@
+## Merkle tree
+
+For a file that needs m blocks we will have the least power of two greater than (or equal to) m blocks in the merkle tree, zero padded.
+These zero blocks need not be actually stored and will never be requested by the contract. 
+
+
+
+## Contract
+
+Initialised on block T_0.
+Wait N blocks.
+File has m blocks.
+File has root hash H.
+Contract has X ether
+
+Check if:
+
+* The contract has already paid out.
+* The block number is < T_0 + N.
+* The block number is > T_0 + N + 256. (can't get block hash)
+* Proof is invalid.
+
+If any of the above are true the contract should `throw`, aborting the transaction.
+
+### Proof
+
+A proof is a byte array:
+
+    [FILE BLOCK 1024 BYTES #######] || [SHA256] || [SHA256] ...
+
+Where there are ceil(log2(num_blocks)) SHA256 hashes.
+No bounding markers are needed as the size of this is fixed at 1024 + ceil(log2(num_blocks)) * 32 bytes.
+
+The proof validation algorithm is as follows:
+
+    input byte[] proof;
+    let i = blockhash(T_0 + N) % m; // i Is the block required for the proof.
+    let h = SHA256(proof[0, 1024]);
+    let M = 2^(ceil(log2(m)));
+    let j = 1024;
+    let c = 0;
+    while(c < M) {
+        // Is the cth bit of i 0? Reconstruct the tree branching bottom up. 
+        if(i & (1 << c) == 0) { // Assuming big endian, need to check what the EVM uses.
+            h = SHA256(h | proof[j, 256]); // here | denotes concatenation.
+        } else {
+            h = SHA256(proof[j, 256] | h);
+        }
+        c += 1;
+        j += 256;
+    }
+    return h == H;
+
+## Proof construction:
+
+The algorithm for proof construction can b derived from teh validation.
+
+    input int i;
+    input MTree root;
+    let M = 2^(ceil(log2(m)));
+    let j = 1024 + log2(M) * 32;
+    let p = byte[j];
+    x = M / 2;
+    node = root;
+    while(x > 1) {
+        if (i < x) {
+            p[j - 32, j] = SHA256(root.right);
+            node = node.left;
+            x = x / 2;
+        } else {
+            p[j - 32, j] = SHA256(root.left);
+            node = node.right;
+            x = x + x / 2;
+        }
+        j -= 32
+    }
+    assert(j == 1024);
+    assert(node is leaf);
+    p[0, 1024] = SHA256(node);
+    return p;

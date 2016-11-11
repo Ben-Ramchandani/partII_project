@@ -7,3 +7,9 @@ test_files/
 #Vim
 *.swp
 
+#LaTex
+*.aux
+*.log
+*.pdf
+*.synctex.gz
+
