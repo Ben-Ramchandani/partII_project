@@ -19,7 +19,7 @@ public final class Merkle {
 	public final int depth;
 	public final long fileBlocks;
 	public final long totalBlocks;
-	public final int hashLength = 32; // 256 bits
+	public static final int hashLength = 32; // 256 bits
 
 	public byte[] rootHash() throws IOException {
 		this.in.reset();
@@ -39,7 +39,7 @@ public final class Merkle {
 		assert (i >= 0 && i < this.fileBlocks);
 		this.in.reset();
 		byte[] proof = this.proofr(this.depth, this.totalBlocks, i);
-		assert (proof.length == this.blockSize + this.hashLength * this.depth);
+		assert (proof.length == this.blockSize + Merkle.hashLength * this.depth);
 		return proof;
 	}
 
@@ -61,20 +61,33 @@ public final class Merkle {
 	}
 
 	public boolean validateProof(byte[] rootHash, byte[] proof, int i) {
-		assert (proof.length == this.blockSize + this.hashLength * this.depth);
-		byte[] hash = Util.hash(Util.slice(proof, 0, this.blockSize));
+		if (proof.length != this.blockSize + Merkle.hashLength * this.depth) {
+			throw new RuntimeException("Assertion failed, proof length inconsistent.");
+		}
+		return Merkle.validate(this.blockSize, rootHash, proof, i);
+	}
 
-		int proofPosition = this.blockSize;
-		for (int n = 0; n < this.depth; n++) {
-			byte[] otherHash = Util.slice(proof, proofPosition, proofPosition + this.hashLength);
+	public static boolean validate(int blockSize, byte[] rootHash, byte[] proof, int i) {
+		int depth = (proof.length - blockSize) / Merkle.hashLength;
+		byte[] hash = Util.hash(Util.slice(proof, 0, blockSize));
+
+		int proofPosition = blockSize;
+		for (int n = 0; n < depth; n++) {
+			byte[] otherHash = Util.slice(proof, proofPosition, proofPosition + Merkle.hashLength);
 			if (i % 2 == 0) { // We have the left hash.
 				hash = Util.hash(Util.byteCombine(hash, otherHash));
 			} else {
 				hash = Util.hash(Util.byteCombine(otherHash, hash));
 			}
 			i /= 2;
-			proofPosition += this.hashLength;
+			proofPosition += Merkle.hashLength;
 		}
 		return Arrays.equals(hash, rootHash);
+	}
+
+	@Override
+	public String toString() {
+		return "Merkle tree." + "\nBlock size: " + this.blockSize + "\nFile blocks: " + this.fileBlocks
+				+ "\nTotal blocks : " + this.totalBlocks + "\nTree depth: " + this.depth;
 	}
 }

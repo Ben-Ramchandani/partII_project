@@ -191,4 +191,35 @@ public class MerkleTest {
 			}
 		}
 	}
+
+	@Test
+	public void testBigFile() throws Exception {
+		this.b = new BlockStream(Paths.get(TEST_FILE_PATH + "big.file"), 1024);
+		// //This takes 36 seconds to run, so is left disabled.
+		// //It ends up taking about 16 seconds per gigabyte.
+		// Merkle m = new Merkle(this.b);
+		// System.out.println(m.toString());
+		// System.out.println(DatatypeConverter.printHexBinary(m.rootHash()));
+		// System.out.println(DatatypeConverter.printHexBinary(m.proof(93280)));
+	}
+
+	@Test
+	public void testBigFileValidate() throws Exception {
+		//This takes about 60 seconds.
+//		int blockSize = 1024;
+//		this.b = new BlockStream(Paths.get(TEST_FILE_PATH + "big.file"), blockSize);
+//		Merkle m = new Merkle(this.b);
+//		int blockNumber = 4;
+//		byte[] proof = m.proof(blockNumber);
+//		byte[] rootHash = m.rootHash();
+//		assertTrue(Merkle.validate(1024, rootHash, proof, blockNumber));
+//		assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber + 1));
+//		proof[1727]++;
+//		assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber));
+//		proof[1727]--;
+//		assertTrue(Merkle.validate(1024, rootHash, proof, blockNumber));
+//		rootHash[13]++;
+//		assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber));
+	}
+
 }
