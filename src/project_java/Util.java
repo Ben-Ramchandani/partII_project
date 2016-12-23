@@ -1,7 +1,6 @@
 package project_java;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import fr.cryptohash.Keccak256;
 
 public final class Util {
 	private Util() {
@@ -9,15 +8,9 @@ public final class Util {
 	}
 
 	public static byte[] hash(byte[] d) {
-		MessageDigest md;
-		try {
-			md = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			throw new RuntimeException("No SHA256");
-		}
-		md.update(d);
-		return md.digest();
+		Keccak256 kek = new Keccak256();
+		kek.update(d);
+		return kek.digest();
 	}
 
 	public static long leastGreaterPowerOf2(long x) {
