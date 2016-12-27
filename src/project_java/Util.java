@@ -1,5 +1,10 @@
 package project_java;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import fr.cryptohash.Keccak256;
 
 public final class Util {
@@ -50,5 +55,10 @@ public final class Util {
 		byte[] res = new byte[len];
 		System.arraycopy(in, from, res, 0, len);
 		return res;
+	}
+
+	static String readFile(String path) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, StandardCharsets.UTF_8);
 	}
 }

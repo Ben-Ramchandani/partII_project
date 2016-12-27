@@ -1,11 +1,15 @@
 package project_java;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.Arrays;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,11 +51,10 @@ public class MerkleTest {
 		Merkle m = new Merkle(this.b);
 
 		assertTrue(m.fileBlocks == 1 && m.totalBlocks == 1 && m.depth == 0);
-		// Now using Keccak256.
-		// SHA256 value is from
-		// http://www.xorbin.com/tools/sha256-hash-calculator.
-		// assertTrue(Arrays.equals(m.rootHash(),
-		// DatatypeConverter.parseHexBinary("ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb")));
+		// KECCAK256 value is from
+		// https://emn178.github.io/online-tools/keccak_256.html
+		assertTrue(Arrays.equals(m.rootHash(),
+				DatatypeConverter.parseHexBinary("3ac225168df54212a25c1c01fd35bebfea408fdac2e31ddd6f80a4bbf9a5f1cb")));
 	}
 
 	@Test

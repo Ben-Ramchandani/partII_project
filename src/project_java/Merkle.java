@@ -11,6 +11,7 @@ public final class Merkle {
 		this.fileBlocks = Util.divRoundUp(in.fileSize, (long) this.blockSize);
 		this.totalBlocks = Util.leastGreaterPowerOf2(this.fileBlocks);
 		this.depth = Util.log2(this.totalBlocks);
+		this.proofLength = this.blockSize + this.depth * Merkle.hashLength;
 	}
 
 	private BlockStream in;
@@ -20,7 +21,8 @@ public final class Merkle {
 	public final long fileBlocks;
 	public final long totalBlocks;
 	public static final int hashLength = 32; // 256 bits
-
+	public final int proofLength;
+	
 	public byte[] rootHash() throws IOException {
 		this.in.reset();
 		return this.merkler(this.depth);
@@ -36,7 +38,7 @@ public final class Merkle {
 	}
 
 	public byte[] proof(int i) throws IOException {
-		assert (i >= 0 && i < this.fileBlocks);
+		assert (i >= 0 && i < this.fileBlocks) : "Proof block does not exist.";
 		this.in.reset();
 		byte[] proof = this.proofr(this.depth, this.totalBlocks, i);
 		assert (proof.length == this.blockSize + Merkle.hashLength * this.depth);
