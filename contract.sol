@@ -9,14 +9,26 @@ contract FilePay {
         validFromBlock = block.number + BLOCKS_BEFORE_VALID;
     }
     
-    function submitProof(bytes32[PROOF_LENGTH_256_BITS] proof) {
+    function validToCall() returns (bool) {
         if(
             block.number < validFromBlock
             || block.number > validFromBlock + 255) {
-                throw;
-            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    function getValidFrom() returns (uint) {
+    	return validFromBlock;
+    }
+    
+    function submitProof(bytes32[PROOF_LENGTH_256_BITS] proof) returns (uint) {
+        if(!validToCall()) {
+            return 1;
+        }
         if(!validateProof(proof, proofBlock())) {
-            throw;
+            return 2;
         }
         suicide(msg.sender);
     }
@@ -27,26 +39,17 @@ contract FilePay {
         }
     }
     
-    function test() returns (bytes32 res) {
-        bytes32[2] memory arr = [bytes32(0x3737373737373737373737373737373737373737373737373737373737373737), bytes32(0x3737373737373737373737373737373737373737373737373737373737373737)];
-        return sha3(arr);
-        //return 0x3737373737373737373737373737373737373737373737373737373737373737;
-        //return sha3(0x3737373737373737373737373737373737373737373737373737373737373737);
+    function test(bytes32 arg) returns (bytes32 res) {
+        return arg;
     }
     
-    function shaSlice(uint[1] arr, uint start, uint amount) returns (bytes32 res) {
-        assembly {
-            res:=sha3(add(arr, start), amount)
-        }
-    }
-    
-    function proofBlock() internal returns (uint i) {
+    function proofBlock() returns (uint i) {
         uint h = uint(block.blockhash(validFromBlock));
         return h % BLOCKS_IN_FILE;
     }
     
     function validateProof(bytes32[PROOF_LENGTH_256_BITS] memory proof, uint i)
-        internal returns (bool valid) {
+        returns (bool valid) {
         bytes32 hash;
         uint proofOffset = BLOCK_LENGTH_BYTES / 32;
         bytes32[2] memory hashTarget;

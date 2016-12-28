@@ -7,7 +7,7 @@ import java.util.Iterator;
 import javax.xml.bind.DatatypeConverter;
 
 public class ContractGen {
-	public static final int blocksBeforeValid = 5;
+	public static final int blocksBeforeValid = 1;
 	
 	public static String generate(Merkle merkleTree, String contractSkeletonFile) throws IOException {
 		

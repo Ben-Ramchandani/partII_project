@@ -62,9 +62,9 @@ public class Main {
 			} else if (cmd.hasOption("c")) {
 				byte[] proof = m.proof(proofBlockNum);
 				System.out.print("[");
-				System.out.print("0x" + DatatypeConverter.printHexBinary(Util.slice(proof, 0, 32)));
+				System.out.print("\"0x" + DatatypeConverter.printHexBinary(Util.slice(proof, 0, 32)) + "\"");
 				for (int i = 32; i < proof.length; i += 32) {
-					System.out.print(", 0x" + DatatypeConverter.printHexBinary(Util.slice(proof, i, i + 32)));
+					System.out.print(", \"0x" + DatatypeConverter.printHexBinary(Util.slice(proof, i, i + 32)) + "\"");
 				}
 				System.out.println("]");
 				System.exit(0);
