@@ -4,6 +4,7 @@ lib/
 
 #Eclipse
 .project
+.metadata
 
 #Vim
 *.swp

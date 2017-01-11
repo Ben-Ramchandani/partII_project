@@ -11,7 +11,7 @@ contract FilePay {
     
     function validToCall() returns (bool) {
         if(
-            block.number < validFromBlock
+            block.number <= validFromBlock
             || block.number > validFromBlock + 255) {
             return false;
         } else {
@@ -30,7 +30,8 @@ contract FilePay {
         if(!validateProof(proof, proofBlock())) {
             return 2;
         }
-        suicide(msg.sender);
+        return 0;
+        /*suicide(msg.sender);*/
     }
     
     function recover() {
@@ -41,6 +42,10 @@ contract FilePay {
     
     function test(bytes32 arg) returns (bytes32 res) {
         return arg;
+    }
+
+    function getBlockHash() returns (bytes32 hash) {
+        return block.blockhash(validFromBlock);
     }
     
     function proofBlock() returns (uint i) {
@@ -67,7 +72,7 @@ contract FilePay {
             }
             hash = sha3(hashTarget);
             i /= 2;
-            proofOffset += 32;
+            proofOffset += 1;
         }
         return hash == ROOT_HASH;
     }
