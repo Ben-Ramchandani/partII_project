@@ -9,7 +9,7 @@ import org.apache.commons.cli.*;
 public class Main {
 	// Must be a multiple of 32.
 	public static final int blockSize = 32;
-	public static final String contractSkeletonFile = "contract.sol";
+	public static final String contractSkeletonFile = "contract_lockin.sol";
 	public static final String scriptSkeletonFile = "geth_script.js";
 	public static final String contractName = "FilePay";
 

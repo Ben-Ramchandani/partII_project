@@ -7,7 +7,9 @@ import java.util.Iterator;
 import javax.xml.bind.DatatypeConverter;
 
 public class ContractGen {
-	public static final int blocksBeforeValid = 1;
+	public static final int blocksBeforeValid = 4;
+	public static final int lockInByBlocks = 2;
+	public static final double paymentMultiplyer = 1.0; 
 	
 	public static String generate(Merkle merkleTree, String contractSkeletonFile) throws IOException {
 		
@@ -25,6 +27,9 @@ public class ContractGen {
 		replacements.add(new Replacement("BLOCK_LENGTH_BYTES", Integer.toString(blockSize)));
 		replacements.add(new Replacement("MERKLE_DEPTH", Integer.toString(depth)));
 		replacements.add(new Replacement("PROOF_LENGTH_256_BITS", Integer.toString(proofLength)));
+		replacements.add(new Replacement("LOCK_IN_BY_BLOCKS", Integer.toString(lockInByBlocks)));
+		replacements.add(new Replacement("PAYMENT_MULTIPLYER", Double.toString(paymentMultiplyer)));
+
 		
 		Iterator<Replacement> it = replacements.iterator();
 		

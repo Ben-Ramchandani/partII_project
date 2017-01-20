@@ -1,3 +1,9 @@
+## Security
+
+Block hash of current blocks and blocks > 255 blocks old are 0 in the EVM, have to be careful or required block could be predetermined.
+
+
+
 ## Merkle tree
 
 For a file that needs m blocks we will have the least power of two greater than (or equal to) m blocks in the merkle tree, zero padded.
