@@ -1,6 +1,8 @@
 package project_java;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,6 +18,27 @@ public final class Util {
 		Keccak256 kek = new Keccak256();
 		kek.update(d);
 		return kek.digest();
+	}
+	
+	public static BigInteger hash(BigInteger d) {
+		return new BigInteger(Util.hash(d.toByteArray()));
+	}
+	
+	public static byte[] HMAC(byte[] key, byte[] m) {
+		// We can just concatenate the key with the message as KECCAK-256 is secure against length extension attacks (http://keccak.noekeon.org/).
+		return Util.hash(Util.byteCombine(key, m));
+	}
+	
+	public static byte[] toBytes(int x) {
+	    ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+	    buffer.putInt(x);
+	    return buffer.array();
+	}
+	
+	public static byte[] toBytes(long x) {
+	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+	    buffer.putLong(x);
+	    return buffer.array();
 	}
 
 	public static long leastGreaterPowerOf2(long x) {

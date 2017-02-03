@@ -37,27 +37,27 @@ public final class Merkle {
 		}
 	}
 
-	public byte[] proof(int i) throws IOException {
+	public byte[] proof(long i) throws IOException {
 		assert (i >= 0 && i < this.fileBlocks) : "Proof block does not exist.";
 		this.in.reset();
-		byte[] proof = this.proofr(this.depth, this.totalBlocks, i);
+		byte[] proof = this.proofr(this.depth, i);
 		assert (proof.length == this.blockSize + Merkle.hashLength * this.depth);
 		return proof;
 	}
 
-	private byte[] proofr(int depth, long N, int i) throws IOException {
-		assert (Util.log2(N) == depth);
-		long M = N / 2;
-		if (M == 0) {
+	private byte[] proofr(int depth, long i) throws IOException {
+		if (depth == 0) {
 			byte[] block = new byte[this.blockSize];
 			this.in.readBlock(block);
 			return block;
 		} else {
+			depth -= 1;
+			long M = (1L << depth); // = 2^(depth)
 			if (i < M) {
-				return Util.byteCombine(this.proofr(depth - 1, M, i), this.merkler(depth - 1));
+				return Util.byteCombine(this.proofr(depth, i), this.merkler(depth));
 			} else {
-				byte[] tmp = this.merkler(depth - 1);
-				return Util.byteCombine(this.proofr(depth - 1, M, (int) (i - M)), tmp);
+				byte[] tmp = this.merkler(depth);
+				return Util.byteCombine(this.proofr(depth, i - M), tmp);
 			}
 		}
 	}
@@ -70,10 +70,29 @@ public final class Merkle {
 	}
 
 	public static boolean validate(int blockSize, byte[] rootHash, byte[] proof, int i) {
+		/*
+		 * Proof:
+		 * [FILE_CHUNK[i] ######] | [KECCAK256] | [KECCAK256'] | ...
+		 * \                    /   \                              /
+		 *       Chunk size                depth * hash length
+		 * 
+		 *                        ^
+		 *              Initial proof position
+		 * 
+		 * Initial value of hash is KECCCAK256(FILE_CHUNK[i]).
+		 * 
+		 * We walk up the Merkle tree.
+		 * At each point we take the next hash from the proof (otherHash),
+		 * and work out whether we're coming up a right branch or a left branch (which depends on i).
+		 * 
+		 * A proof is valid iff it results in the root hash.
+		 */
+		
 		int depth = (proof.length - blockSize) / Merkle.hashLength;
 		byte[] hash = Util.hash(Util.slice(proof, 0, blockSize));
-
 		int proofPosition = blockSize;
+		
+		
 		for (int n = 0; n < depth; n++) {
 			byte[] otherHash = Util.slice(proof, proofPosition, proofPosition + Merkle.hashLength);
 			if (i % 2 == 0) { // We have the left hash.
