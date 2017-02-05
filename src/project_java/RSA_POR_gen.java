@@ -6,7 +6,7 @@ import java.util.Random;
 
 
 public class RSA_POR_gen {
-	public static final BigInteger TWO = BigInteger.ONE.add(BigInteger.ONE);
+	public static final BigInteger TWO = BigInteger.valueOf(2);
 	public static final int len_lambda = 512;
 	public static final BigInteger lambda = TWO.pow(len_lambda-5);
 	public static final int len_v = 256;
@@ -17,7 +17,7 @@ public class RSA_POR_gen {
 		out.println(num.toString(16));
 	}
 
-	// I'm pretty sure this isn't really necessary as the condition is effectively never triggered
+	// I'm pretty sure this isn't really necessary as the condition is effectively never triggered for large p, q.
 	public static BigInteger findGenerator(BigInteger p, BigInteger q, BigInteger N) {
 		BigInteger a;
 		Random rand = new Random();
@@ -54,8 +54,6 @@ public class RSA_POR_gen {
 		
 		BigInteger v = new BigInteger(len_v, rand);
 		
-		printBigInteger(p, out);
-		printBigInteger(q, out);
 		printBigInteger(N, out);
 		printBigInteger(g, out);
 		printBigInteger(e, out);

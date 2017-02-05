@@ -8,12 +8,12 @@ import java.nio.file.Path;
 
 public class BlockStream {
 	private final byte[] zeroArray;
-	
+
 	private SeekableByteChannel in;
 	public final int blockSize;
 	public final long fileSize;
 	public final long fileBlocks;
-	
+
 	public BlockStream(Path p, int blockLen) throws IOException {
 		this.in = Files.newByteChannel(p);
 		this.blockSize = blockLen;
@@ -21,26 +21,41 @@ public class BlockStream {
 		this.zeroArray = new byte[blockLen];
 		this.fileBlocks = Util.divRoundUp(fileSize, (long) this.blockSize);
 	}
-	
+
 	public void readBlock(byte[] array) throws IOException {
-		assert(array.length == this.blockSize);
+		assert (array.length == this.blockSize);
 		ByteBuffer b = ByteBuffer.wrap(array);
-		
-		while(b.position() < this.blockSize && this.in.position() < this.fileSize) {
+
+		while (b.position() < this.blockSize && this.in.position() < this.fileSize) {
 			in.read(b);
 		}
-		
-		if(b.position() < blockSize) {
+
+		if (b.position() < blockSize) {
 			b.put(this.zeroArray, 0, blockSize - b.position());
 		}
 	}
-	
+
 	public void reset() throws IOException {
 		this.in.position(0);
 	}
-	
-	//TODO: get chunk at index i
+
 	public byte[] getChunk(long i) {
-		return null;
+		assert(i < fileBlocks);
+		try {
+			in.position(i * blockSize);
+			ByteBuffer b = ByteBuffer.wrap(new byte[blockSize]);
+			
+			while (b.position() < this.blockSize && this.in.position() < this.fileSize) {
+				in.read(b);
+			}
+			
+			if (b.position() < blockSize) {
+				b.put(this.zeroArray, 0, blockSize - b.position());
+			}
+			return b.array();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 }

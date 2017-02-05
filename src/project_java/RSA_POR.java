@@ -13,7 +13,7 @@ public class RSA_POR {
 	
 	public static int maxChunksBits = 32;
 	
-	public BigInteger p, q, N;
+	public BigInteger N;
 	public BigInteger g;
 	public BigInteger e, d;
 	public byte[] v;
@@ -31,8 +31,6 @@ public class RSA_POR {
 		} catch(IOException e) {
 			System.exit(2);
 		}
-		p = new BigInteger(lines.remove(0), 16);
-		q = new BigInteger(lines.remove(0), 16);
 		N = new BigInteger(lines.remove(0), 16);
 		g = new BigInteger(lines.remove(0), 16);
 		e = new BigInteger(lines.remove(0), 16);
@@ -45,13 +43,15 @@ public class RSA_POR {
 		this.in = in;
 	}
 	
-	public BigInteger getW_i(int i) {
-		return new BigInteger(Util.HMAC(v, Util.toBytes(i)));
+	public BigInteger gethW_i(int i) {
+		//return new BigInteger(Util.HMAC(v, Util.toBytes(i)));
+		return BigInteger.valueOf(2);
 	}
 	
-	public BigInteger tagChunk(byte[] chunkBytes, int chunkIndex) {
+	public BigInteger tagChunk(int chunkIndex) {
+		byte[] chunkBytes = in.getChunk(chunkIndex);
 		BigInteger chunk = new BigInteger(chunkBytes);
-		BigInteger hW_i = Util.hash(getW_i(chunkIndex));
+		BigInteger hW_i = gethW_i(chunkIndex);
 		BigInteger g_to_chunk = g.modPow(chunk, N);
 		BigInteger mult = hW_i.multiply(g_to_chunk);
 		return mult.modPow(d, N);
