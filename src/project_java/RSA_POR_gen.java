@@ -8,7 +8,8 @@ import java.util.Random;
 public class RSA_POR_gen {
 	public static final BigInteger TWO = BigInteger.valueOf(2);
 	public static final int len_lambda = 512;
-	public static final BigInteger lambda = TWO.pow(len_lambda-5);
+	public static final BigInteger len_N = BigInteger.valueOf(len_lambda * 2);
+	public static final BigInteger lambda = TWO.pow(len_lambda-4);
 	public static final int len_v = 256;
 	public BigInteger[] chunks;
 	public BigInteger[] tags;
@@ -39,7 +40,7 @@ public class RSA_POR_gen {
 		BigInteger p = BigInteger.probablePrime(len_lambda, rand);
 		BigInteger pp = p.subtract(BigInteger.ONE).divide(TWO);
 		BigInteger q = BigInteger.probablePrime(len_lambda, rand);
-		BigInteger qq = p.subtract(BigInteger.ONE).divide(TWO);
+		BigInteger qq = q.subtract(BigInteger.ONE).divide(TWO);
 		BigInteger N = p.multiply(q);
 		BigInteger ppqq = pp.multiply(qq);
 
@@ -59,30 +60,48 @@ public class RSA_POR_gen {
 		printBigInteger(e, out);
 		printBigInteger(d, out);
 		printBigInteger(v, out);
+		printBigInteger(len_N, out);
+		
+		System.out.println("p: " + p);
+		System.out.println("q: " + q);
+		System.out.println("pp: " + pp);
+		System.out.println("qq: " + qq);
+		System.out.println("p'q': " + ppqq);
+		System.out.println("N: " + N);
+		System.out.println("g: " + g);
+		System.out.println("e: " + e);
+		System.out.println("d: " + d);
+		System.out.println("v: " + v);
+		System.out.println("len_N: " + len_N);
 	}
 
 	// Find x, y such that ax + by = 1.
 	public static BigInteger egcd(BigInteger a, BigInteger b) {
-		BigInteger x_1 = BigInteger.ZERO, x_2 = BigInteger.ONE, y_1 = BigInteger.ONE, y_2 = BigInteger.ZERO,
-				x = BigInteger.ONE, y = BigInteger.ZERO;
+		BigInteger savea = a;
+		BigInteger saveb = b;
+		BigInteger lastx = BigInteger.ONE, lasty = BigInteger.ZERO,
+				x = BigInteger.ZERO, y = BigInteger.ONE, temp;
 		BigInteger q, r;
 
 		while (b.compareTo(BigInteger.ZERO) > 0) {
 			q = a.divide(b);
 			r = a.subtract(q.multiply(b));
-			x = x_2.subtract(q.multiply(x_1));
-			y = y_2.subtract(q.multiply(y_1));
+			
 			a = b;
 			b = r;
-			x_2 = x_1;
-			y_2 = y_1;
-			x_1 = x;
-			y_1 = y;
+			
+			temp = x;
+			x = lastx.subtract(q.multiply(x));
+			lastx = temp;
+			
+			temp = y;
+			y = lasty.subtract(q.multiply(y));
+			lasty = temp;
 		}
 
 		assert (a.equals(BigInteger.ONE));
-		assert (a.multiply(x).add(b.multiply(y)).equals(BigInteger.ONE));
-		return x;
+		assert (savea.multiply(lastx).add(saveb.multiply(lasty)).equals(BigInteger.ONE));
+		return lastx;
 	}
 }
 
