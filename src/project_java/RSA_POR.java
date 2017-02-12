@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RSA_POR {
@@ -20,6 +19,8 @@ public class RSA_POR {
 	public BigInteger e, d;
 	public int len_N;
 	public byte[] v;
+
+	public ArrayList<BigInteger> test_tags = new ArrayList<BigInteger>();
 
 	public BlockStream in;
 
@@ -47,34 +48,23 @@ public class RSA_POR {
 	}
 
 	public BigInteger gethW_i(int i) {
-		 //return new BigInteger(1, Util.HMAC(v, Util.toBytes(i)));
-		return BigInteger.valueOf(2);
+		return new BigInteger(1, Util.HMAC(v, Util.toBytes(i)));
 	}
-	//
-	// //UNUSED
-	// public BigInteger tagChunk(int chunkIndex) {
-	// byte[] chunkBytes = in.getChunk(chunkIndex);
-	// return tagChunk(chunkBytes, chunkIndex);
-	// }
 
 	public BigInteger tagChunk(byte[] chunkBytes, int chunkIndex) {
+		// T_i = (h(W_i) * g^(b_i))^d
 		BigInteger chunk = new BigInteger(1, chunkBytes);
 		BigInteger hW_i = gethW_i(chunkIndex);
 		BigInteger g_to_chunk = g.modPow(chunk, N);
 		BigInteger mult = hW_i.multiply(g_to_chunk);
-		assert(chunk.compareTo(BigInteger.ZERO) >= 0);
+		assert (chunk.compareTo(BigInteger.ZERO) >= 0);
 		return mult.modPow(d, N);
 	}
 
-	// //UNUSED
-	// public byte[] paddedTag(int chunkIndex) {
-	// BigInteger tagInt = tagChunk(chunkIndex);
-	// byte[] tagBytes = tagInt.toByteArray();
-	// return padTag(tagBytes);
-	// }
-
 	public byte[] padTag(byte[] tagBytes) {
-		assert(tagBytes.length <= len_N + 1);
+		// We need the extra byte because BigInteger uses two's complement so it
+		// can represent negative values.
+		assert (tagBytes.length <= len_N + 1);
 		byte[] tagBytesPadded = new byte[len_N + 1];
 		System.arraycopy(tagBytes, 0, tagBytesPadded, len_N + 1 - tagBytes.length, tagBytes.length);
 		return tagBytesPadded;
@@ -86,11 +76,11 @@ public class RSA_POR {
 		for (int i = 0; i < in.fileBlocks; i++) {
 			in.readBlock(currentChunk);
 			BigInteger tagInt = tagChunk(currentChunk, i);
-			assert(tagInt.compareTo(BigInteger.ZERO) >= 0);
+			assert (tagInt.compareTo(BigInteger.ZERO) >= 0);
 			byte[] tagBytes = padTag(tagInt.toByteArray());
 			out.write(tagBytes);
-			
-			System.out.println(i + ": " + tagInt);
+
+			test_tags.add(tagInt);
 		}
 	}
 

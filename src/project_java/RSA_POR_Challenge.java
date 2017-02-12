@@ -18,16 +18,6 @@ public class RSA_POR_Challenge {
 		this.numChunksProof = numChunks;
 	}
 
-	public RSA_Proof genProofSingle(int chunkIndex, byte[] chunkBytes, byte[] chunkTagBytes) {
-		BigInteger a = new BigInteger(Util.HMAC(coefficientKey, Util.toBytes(chunkIndex)));
-		BigInteger chunk = new BigInteger(chunkBytes);
-		BigInteger chunkTag = new BigInteger(chunkTagBytes);
-
-		BigInteger T = chunkTag.modPow(a, parent.N);
-		BigInteger M = chunk.multiply(a);
-		return new RSA_Proof(T, M);
-	}
-
 	public List<Integer> getChunkSet() {
 		List<Integer> res = new ArrayList<Integer>();
 		assert (numChunksProof <= parent.in.fileBlocks);
@@ -40,29 +30,8 @@ public class RSA_POR_Challenge {
 	}
 
 	public BigInteger getCoefficient(int chunkIndex) {
-		// byte[] a = Util.HMAC(coefficientKey, Util.toBytes(chunkIndex));
-		// return new BigInteger(1, a);
-		return BigInteger.valueOf(2);
-	}
-
-	public RSA_Proof genProof(byte[][] chunkTagBytes) {
-		List<Integer> chunkSet = getChunkSet();
-
-		BigInteger T = BigInteger.ONE;
-		BigInteger M = BigInteger.ZERO;
-
-		for (int i = 0; i < chunkSet.size(); i++) {
-			int chunkIndex = chunkSet.get(i);
-			BigInteger chunk = new BigInteger(1, parent.in.getChunk(chunkIndex));
-			BigInteger a = getCoefficient(chunkIndex);
-			BigInteger chunkTag = new BigInteger(1, chunkTagBytes[chunkIndex]);
-
-			T = T.multiply(chunkTag.modPow(a, parent.N)).mod(parent.N);
-
-			M = M.add(chunk.multiply(a));
-		}
-
-		return new RSA_Proof(T, M);
+		byte[] a = Util.HMAC(coefficientKey, Util.toBytes(chunkIndex));
+		return new BigInteger(1, a);
 	}
 
 	public RSA_Proof genProof(BlockStream chunkTags) {
@@ -72,13 +41,14 @@ public class RSA_POR_Challenge {
 		BigInteger T = BigInteger.ONE;
 		BigInteger M = BigInteger.ZERO;
 
+		// T = T_0^(a_0) * T_1^(a_1) ...
+		// M = a_0*b_0 + a_1*b_1 ...
+		// (selected chunks only)
 		for (int i = 0; i < chunkSet.size(); i++) {
 			int chunkIndex = chunkSet.get(i);
 			BigInteger chunk = new BigInteger(1, parent.in.getChunk(chunkIndex));
 			BigInteger a = getCoefficient(chunkIndex);
 			BigInteger chunkTag = new BigInteger(chunkTags.getChunk(chunkIndex));
-			
-			System.out.println(chunkIndex + ": " + chunkTag);
 
 			T = T.multiply(chunkTag.modPow(a, parent.N)).mod(parent.N);
 
@@ -88,37 +58,27 @@ public class RSA_POR_Challenge {
 		return new RSA_Proof(T, M);
 	}
 
-	// UNUSED
-	public static byte[] stripPadding(byte[] paddedTag) {
-		int i = 0;
-		while(paddedTag[i] == 0) {
-			i++;
-		}
-		byte[] tag = new byte[paddedTag.length - i];
-		System.arraycopy(paddedTag, i, tag, 0, tag.length);
-		return tag;
-	}
-
 	public boolean checkProof(RSA_Proof proof) {
 		BigInteger T = proof.T;
 		BigInteger M = proof.M;
 		List<Integer> chunkSet = getChunkSet();
 
+		// tau = T^e
 		BigInteger tau = T.modPow(parent.e, parent.N);
-		// System.out.println("tau: " + tau);
 
+		// tau = tau/(h(W_i)^(a_i)) for each i in chunkSet.
 		Iterator<Integer> it = chunkSet.iterator();
 		while (it.hasNext()) {
 			int chunkIndex = it.next();
 			BigInteger hW_i = parent.gethW_i(chunkIndex);
 			BigInteger a_i = getCoefficient(chunkIndex);
 			tau = tau.multiply(hW_i.modPow(a_i.negate(), parent.N)).mod(parent.N);
-			// System.out.println("tau: " + tau);
 		}
 
+		// We check g^M == tau
 		BigInteger gM = parent.g.modPow(M, parent.N);
 
-		// TODO: check |M| < lambda/2
+		assert (BigInteger.valueOf(M.bitLength()).compareTo(RSA_POR_gen.lambda) < 0);
 		return gM.equals(tau);
 	}
 }
