@@ -6,32 +6,32 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class BlockStream {
+public class ChunkStream {
 	private final byte[] zeroArray;
 
 	private SeekableByteChannel in;
-	public final int blockSize;
+	public final int chunkSize;
 	public final long fileSize;
 	public final long fileBlocks;
 
-	public BlockStream(Path p, int blockLen) throws IOException {
+	public ChunkStream(Path p, int blockLen) throws IOException {
 		this.in = Files.newByteChannel(p);
-		this.blockSize = blockLen;
+		this.chunkSize = blockLen;
 		this.fileSize = in.size();
 		this.zeroArray = new byte[blockLen];
-		this.fileBlocks = Util.divRoundUp(fileSize, (long) this.blockSize);
+		this.fileBlocks = Util.divRoundUp(fileSize, (long) this.chunkSize);
 	}
 
-	public void readBlock(byte[] array) throws IOException {
-		assert (array.length == this.blockSize);
+	public void readChunk(byte[] array) throws IOException {
+		assert (array.length == this.chunkSize);
 		ByteBuffer b = ByteBuffer.wrap(array);
 
-		while (b.position() < this.blockSize && this.in.position() < this.fileSize) {
+		while (b.position() < this.chunkSize && this.in.position() < this.fileSize) {
 			in.read(b);
 		}
 
-		if (b.position() < blockSize) {
-			b.put(this.zeroArray, 0, blockSize - b.position());
+		if (b.position() < chunkSize) {
+			b.put(this.zeroArray, 0, chunkSize - b.position());
 		}
 	}
 
@@ -42,15 +42,15 @@ public class BlockStream {
 	public byte[] getChunk(long i) {
 		assert(i < fileBlocks);
 		try {
-			in.position(i * blockSize);
-			ByteBuffer b = ByteBuffer.wrap(new byte[blockSize]);
+			in.position(i * chunkSize);
+			ByteBuffer b = ByteBuffer.wrap(new byte[chunkSize]);
 			
-			while (b.position() < this.blockSize && this.in.position() < this.fileSize) {
+			while (b.position() < this.chunkSize && this.in.position() < this.fileSize) {
 				in.read(b);
 			}
 			
-			if (b.position() < blockSize) {
-				b.put(this.zeroArray, 0, blockSize - b.position());
+			if (b.position() < chunkSize) {
+				b.put(this.zeroArray, 0, chunkSize - b.position());
 			}
 			return b.array();
 		} catch (IOException e) {

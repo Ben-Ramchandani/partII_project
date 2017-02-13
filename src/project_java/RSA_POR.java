@@ -22,9 +22,9 @@ public class RSA_POR {
 
 	public ArrayList<BigInteger> test_tags = new ArrayList<BigInteger>();
 
-	public BlockStream in;
+	public ChunkStream in;
 
-	public RSA_POR(File keyFile, BlockStream in) {
+	public RSA_POR(File keyFile, ChunkStream in) {
 		List<String> lines = new ArrayList<String>();
 		try (BufferedReader br = new BufferedReader(new FileReader(keyFile))) {
 			String line;
@@ -72,9 +72,9 @@ public class RSA_POR {
 
 	public void tagAll(OutputStream out) throws IOException {
 		in.reset();
-		byte[] currentChunk = new byte[in.blockSize];
+		byte[] currentChunk = new byte[in.chunkSize];
 		for (int i = 0; i < in.fileBlocks; i++) {
-			in.readBlock(currentChunk);
+			in.readChunk(currentChunk);
 			BigInteger tagInt = tagChunk(currentChunk, i);
 			assert (tagInt.compareTo(BigInteger.ZERO) >= 0);
 			byte[] tagBytes = padTag(tagInt.toByteArray());

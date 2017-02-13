@@ -23,25 +23,25 @@ public class BlockStreamTest {
 		writer.print(testString);
 		writer.close();
 
-		BlockStream b = new BlockStream(Paths.get(TEST_FILE_PATH + "file.txt"), blockSize);
+		ChunkStream b = new ChunkStream(Paths.get(TEST_FILE_PATH + "file.txt"), blockSize);
 		assertEquals(b.fileSize, testString.length());
 
 		byte[] array = new byte[blockSize];
 
-		b.readBlock(array);
+		b.readChunk(array);
 		assertEquals(new String(array, StandardCharsets.UTF_8), testString.substring(0, blockSize));
 		b.reset();
 
 		for (int i = 0; (i + 1) * blockSize <= testString.length(); i++) {
-			b.readBlock(array);
+			b.readChunk(array);
 			assertEquals(new String(array, StandardCharsets.UTF_8),
 					testString.substring(i * blockSize, (i + 1) * blockSize));
 		}
 
-		b.readBlock(array);
+		b.readChunk(array);
 		assertTrue(Arrays.equals(Util.byteCombine("uvwxyz".getBytes(StandardCharsets.UTF_8), new byte[4]), array));
 
-		b.readBlock(array);
+		b.readChunk(array);
 		assertTrue(Arrays.equals(new byte[blockSize], array));
 	}
 
@@ -51,11 +51,11 @@ public class BlockStreamTest {
 		writer.print("a");
 		writer.close();
 
-		BlockStream b = new BlockStream(Paths.get(TEST_FILE_PATH + "file.txt"), 3);
+		ChunkStream b = new ChunkStream(Paths.get(TEST_FILE_PATH + "file.txt"), 3);
 		assertEquals(b.fileSize, "a".length());
 
 		byte[] array = new byte[3];
-		b.readBlock(array);
+		b.readChunk(array);
 
 		assertTrue(array[0] == 97);
 		assertTrue(array[1] == 0);

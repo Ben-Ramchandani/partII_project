@@ -21,8 +21,8 @@ public class RSA_Main {
 		System.out.println("Hi");
 
 		File f = new File("test_files/keys.txt");
-		BlockStream bl = new BlockStream(Paths.get("test_files/pic.png"), 1024);
-		System.out.println("BlockSize: " + bl.blockSize);
+		ChunkStream bl = new ChunkStream(Paths.get("test_files/pic.png"), 1024);
+		System.out.println("BlockSize: " + bl.chunkSize);
 		System.out.println("FileBlocks: " + bl.fileBlocks);
 		RSA_POR r = new RSA_POR(f, bl);
 		r.tagAll(new FileOutputStream(new File("test_files/out.tags")));
@@ -33,7 +33,7 @@ public class RSA_Main {
 		byte[] chunkKey = new byte[256];
 		rand.nextBytes(chunkKey);
 
-		BlockStream tags = new BlockStream(Paths.get("test_files/out.tags"), r.len_N + 1);
+		ChunkStream tags = new ChunkStream(Paths.get("test_files/out.tags"), r.len_N + 1);
 
 		RSA_POR_Challenge chal = new RSA_POR_Challenge(r, chunkKey, coefficientKey, 10);
 		System.out.println("Chunks: " + chal.getChunkSet());

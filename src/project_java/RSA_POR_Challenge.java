@@ -34,8 +34,8 @@ public class RSA_POR_Challenge {
 		return new BigInteger(1, a);
 	}
 
-	public RSA_Proof genProof(BlockStream chunkTags) {
-		assert (chunkTags.blockSize == parent.len_N + 1);
+	public RSA_Proof genProof(ChunkStream chunkTags) {
+		assert (chunkTags.chunkSize == parent.len_N + 1);
 		List<Integer> chunkSet = getChunkSet();
 
 		BigInteger T = BigInteger.ONE;

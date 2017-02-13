@@ -17,7 +17,7 @@ contract FilePayLockIn {
     }
 
     function lockIn() payable {
-        if(msg.value > requiredLockIn() && lockedInAddress == 0 && block.number < lockInByBlock) {
+        if(msg.value >= requiredLockIn() && lockedInAddress == 0 && block.number < lockInByBlock) {
             lockedInAddress = msg.sender;
             LockedIn(msg.sender);
         } else {
@@ -27,6 +27,10 @@ contract FilePayLockIn {
 
     function requiredLockIn() returns (uint) {
         return interestValue * PAYMENT_MULTIPLYER;
+    }
+
+    function lockInAddress() returns (address) {
+        return lockedInAddress;
     }
     
     function validToCall() returns (bool) {
