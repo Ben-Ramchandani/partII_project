@@ -82,7 +82,7 @@ public class Main {
 			int numProofs = ContractGen.numProofChunks;
 			byte[] proof = new byte[0];
 			for(int i=0;i<numProofs;i++) {
-				int proofChunk = (new BigInteger(1, blockHash)).mod(BigInteger.valueOf(b.fileBlocks)).intValueExact();
+				int proofChunk = (new BigInteger(1, blockHash)).mod(BigInteger.valueOf(b.fileChunks)).intValueExact();
 				System.err.println("Generating proof for chunk " + proofChunk + " (" + (i+1) + " out of " + numProofs + ").");
 				proof = Util.byteCombine(proof, m.proof(proofChunk));
 			}

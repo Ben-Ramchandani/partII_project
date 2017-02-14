@@ -23,7 +23,7 @@ public class RSA_Main {
 		File f = new File("test_files/keys.txt");
 		ChunkStream bl = new ChunkStream(Paths.get("test_files/pic.png"), 1024);
 		System.out.println("BlockSize: " + bl.chunkSize);
-		System.out.println("FileBlocks: " + bl.fileBlocks);
+		System.out.println("FileBlocks: " + bl.fileChunks);
 		RSA_POR r = new RSA_POR(f, bl);
 		r.tagAll(new FileOutputStream(new File("test_files/out.tags")));
 

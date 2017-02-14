@@ -73,7 +73,7 @@ public class RSA_POR {
 	public void tagAll(OutputStream out) throws IOException {
 		in.reset();
 		byte[] currentChunk = new byte[in.chunkSize];
-		for (int i = 0; i < in.fileBlocks; i++) {
+		for (int i = 0; i < in.fileChunks; i++) {
 			in.readChunk(currentChunk);
 			BigInteger tagInt = tagChunk(currentChunk, i);
 			assert (tagInt.compareTo(BigInteger.ZERO) >= 0);

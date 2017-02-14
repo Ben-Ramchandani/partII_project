@@ -1,5 +1,6 @@
 package project_java;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,10 +21,10 @@ public class RSA_POR_Challenge {
 
 	public List<Integer> getChunkSet() {
 		List<Integer> res = new ArrayList<Integer>();
-		assert (numChunksProof <= parent.in.fileBlocks);
+		assert (numChunksProof <= parent.in.fileChunks);
 		BigInteger chunkKeyInt = new BigInteger(this.chunkKey);
 		for (int i = 0; i < numChunksProof; i++) {
-			res.add(chunkKeyInt.mod(BigInteger.valueOf(parent.in.fileBlocks)).intValue());
+			res.add(chunkKeyInt.mod(BigInteger.valueOf(parent.in.fileChunks)).intValue());
 			chunkKeyInt = Util.hash(chunkKeyInt);
 		}
 		return res;
@@ -34,7 +35,7 @@ public class RSA_POR_Challenge {
 		return new BigInteger(1, a);
 	}
 
-	public RSA_Proof genProof(ChunkStream chunkTags) {
+	public RSA_Proof genProof(ChunkStream chunkTags) throws IOException {
 		assert (chunkTags.chunkSize == parent.len_N + 1);
 		List<Integer> chunkSet = getChunkSet();
 

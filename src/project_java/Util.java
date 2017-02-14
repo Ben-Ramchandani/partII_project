@@ -49,7 +49,7 @@ public final class Util {
 		return p;
 	}
 
-	public static long divRoundUp(long x, long y) {
+	public static int divRoundUp(int x, int y) {
 		if (x % y == 0) {
 			return x / y;
 		} else {

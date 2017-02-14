@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public final class Merkle {
-	public Merkle(ChunkStream in) {
+	public Merkle(AChunkStream in) {
 		this.in = in;
 		this.chunkSize = in.chunkSize;
 		this.bytes = new byte[this.chunkSize];
-		this.fileChunks = Util.divRoundUp(in.fileSize, (long) this.chunkSize);
+		this.fileChunks = Util.divRoundUp(in.fileSize, this.chunkSize);
 		this.totalChunks = Util.leastGreaterPowerOf2(this.fileChunks);
 		this.depth = Util.log2(this.totalChunks);
 		this.proofLength = this.chunkSize + this.depth * Merkle.hashLength;
 	}
 
-	private ChunkStream in;
+	private AChunkStream in;
 	private byte[] bytes;
 	public final int chunkSize;
 	public final int depth;
