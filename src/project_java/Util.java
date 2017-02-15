@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import fr.cryptohash.Keccak256;
 
@@ -27,6 +28,20 @@ public final class Util {
 	public static byte[] HMAC(byte[] key, byte[] m) {
 		// We can just concatenate the key with the message as KECCAK-256 is secure against length extension attacks (http://keccak.noekeon.org/).
 		return Util.hash(Util.byteCombine(key, m));
+	}
+	
+	public static BigInteger EVM_HMAC(byte[] i, byte[] k) {
+		assert(k.length == 32);
+		assert(i.length == 4);
+		byte[] hashTarget = Arrays.copyOf(k, 32);
+		for(int j=0;j<4;j++) {
+			hashTarget[j] = (byte) (hashTarget[j] ^ i[j]);
+		}
+		return new BigInteger(1, Util.hash(hashTarget));
+	}
+	
+	public static BigInteger EVM_HMAC(int i, byte[] k) {
+		return Util.EVM_HMAC(Util.toBytes(i), k);
 	}
 	
 	public static byte[] toBytes(int x) {

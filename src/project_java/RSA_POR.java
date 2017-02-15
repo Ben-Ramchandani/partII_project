@@ -60,6 +60,17 @@ public class RSA_POR {
 		assert (chunk.compareTo(BigInteger.ZERO) >= 0);
 		return mult.modPow(d, N);
 	}
+	
+	public BigInteger tagChunk2(byte[] chunkBytes, int chunkIndex) {
+		// T_i = (h(W_i)^-1 * g^(b_i))^d
+		BigInteger chunk = new BigInteger(1, chunkBytes);
+		BigInteger hW_i = gethW_i(chunkIndex);
+		BigInteger hW_i_inverse = hW_i.modInverse(N);
+		BigInteger g_to_chunk = g.modPow(chunk, N);
+		BigInteger mult = hW_i_inverse.multiply(g_to_chunk);
+		assert (chunk.compareTo(BigInteger.ZERO) >= 0);
+		return mult.modPow(d, N);
+	}
 
 	public byte[] padTag(byte[] tagBytes) {
 		// We need the extra byte because BigInteger uses two's complement so it
@@ -70,6 +81,20 @@ public class RSA_POR {
 		return tagBytesPadded;
 	}
 
+	public void tagAll2(OutputStream out) throws IOException {
+		in.reset();
+		byte[] currentChunk = new byte[in.chunkSize];
+		for (int i = 0; i < in.fileChunks; i++) {
+			in.readChunk(currentChunk);
+			BigInteger tagInt = tagChunk2(currentChunk, i);
+			assert (tagInt.compareTo(BigInteger.ZERO) >= 0);
+			byte[] tagBytes = padTag(tagInt.toByteArray());
+			out.write(tagBytes);
+
+			test_tags.add(tagInt);
+		}
+	}
+	
 	public void tagAll(OutputStream out) throws IOException {
 		in.reset();
 		byte[] currentChunk = new byte[in.chunkSize];

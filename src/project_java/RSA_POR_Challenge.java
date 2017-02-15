@@ -82,4 +82,28 @@ public class RSA_POR_Challenge {
 		assert (BigInteger.valueOf(M.bitLength()).compareTo(RSA_POR_gen.lambda) < 0);
 		return gM.equals(tau);
 	}
+	
+	public boolean checkProof2(RSA_Proof proof) {
+		BigInteger T = proof.T;
+		BigInteger M = proof.M;
+		List<Integer> chunkSet = getChunkSet();
+
+		// tau = T^e
+		BigInteger tau = T.modPow(parent.e, parent.N);
+
+		// tau = tau*(h(W_i)^(a_i)) for each i in chunkSet.
+		Iterator<Integer> it = chunkSet.iterator();
+		while (it.hasNext()) {
+			int chunkIndex = it.next();
+			BigInteger hW_i = parent.gethW_i(chunkIndex);
+			BigInteger a_i = getCoefficient(chunkIndex);
+			tau = tau.multiply(hW_i.modPow(a_i, parent.N)).mod(parent.N);
+		}
+
+		// We check g^M == tau
+		BigInteger gM = parent.g.modPow(M, parent.N);
+
+		assert (BigInteger.valueOf(M.bitLength()).compareTo(RSA_POR_gen.lambda) < 0);
+		return gM.equals(tau);
+	}
 }
