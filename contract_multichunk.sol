@@ -60,8 +60,10 @@ contract FilePay {
     
     function proofBlocks() returns (uint[NUM_PROOF_CHUNKS] chunks) {
         uint[NUM_PROOF_CHUNKS] memory chunks;
+        bytes32 currenthash = block.blockhash(validFromBlock);
         for(uint i = 0; i < NUM_PROOF_CHUNKS; i++) {
-            chunks[i] = uint(block.blockhash(validFromBlock)) % BLOCKS_IN_FILE;
+            chunks[i] = uint(currenthash) % BLOCKS_IN_FILE;
+            currentHash = sha3(currentHash);
         }
         return chunks;
     }

@@ -108,7 +108,7 @@ public final class Merkle {
 
 	@Override
 	public String toString() {
-		return "Merkle tree." + "\nChunks size: " + this.chunkSize + "\nFile chunks: " + this.fileChunks
+		return "Chunk size: " + this.chunkSize + "\nFile chunks: " + this.fileChunks
 				+ "\nTotal chunks : " + this.totalChunks + "\nTree depth: " + this.depth;
 	}
 }

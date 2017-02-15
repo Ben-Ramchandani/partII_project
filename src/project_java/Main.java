@@ -2,6 +2,8 @@ package project_java;
 
 import java.math.BigInteger;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -18,22 +20,28 @@ public class Main {
 	public static final String contractSkeletonFile = "contract_lockin.sol";
 	public static final String scriptSkeletonFile = "geth_script.js";
 	public static final String contractName = "FilePayLockIn";
+	public static int numProofChunks;
 
 	public static void printUsage() {
 		System.err.println("Usage: merkle [Options] [File]");
-		System.err.println("-p, --proof-block <block_num>: Generate a proof for this block.");
+		System.err.println("-p, --proof <block_num | block_hash>: An integer representing a chunk index or a hez string representing a block hash,"
+				+ "generate a proof for this chunk, or for chunks based on the block hash provided.");
 		System.err.println("-h, --hex: Print the resulting hash as a hexadecimal value.");
 		System.err.println("-c, --contract: Generate a contract for this file.");
 		System.err.println("-s, --script: Generate a deployment script for this file.");
 		System.err
-				.println("-m, --multi: Generate proofs for multiple chunks of this file based on the blockhash provided.");
+				.println("-m, --multi: Generate proofs for the number of chunks provided. --proof is required and must be a blockhash.");
 	}
 
 	public static void main(String[] args) throws Throwable {
 		String fileName;
 		Options options = new Options();
 
-		Option proofBlock = new Option("p", "proof-block", true, "Generate a proof for this block.");
+		/*
+		 * Declare options.
+		 */
+		Option proofBlock = new Option("p", "proof", true, "An integer representing a chunk index or a hez string representing a block hash,"
+				+ "generate a proof for this chunk, or for chunks based on the block hash provided.");
 		proofBlock.setRequired(false);
 		options.addOption(proofBlock);
 		Option printHex = new Option("h", "hex", false, "Print the resulting hash as a hexadecimal value.");
@@ -46,13 +54,16 @@ public class Main {
 		genScript.setRequired(false);
 		options.addOption(genScript);
 		Option multiProof = new Option("m", "multi", true,
-				"Generate proofs for multiple chunks of this file based on the blockhash provided.");
+				"Generate proofs for the number of chunks provided. --proof is required and must be a blockhash.");
 		multiProof.setRequired(false);
 		options.addOption(multiProof);
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd;
 
+		/*
+		 * Parse options.
+		 */
 		try {
 			cmd = parser.parse(options, args);
 			String[] leftOver = cmd.getArgs();
@@ -71,23 +82,52 @@ public class Main {
 			return;
 		}
 
-		ChunkStream b = new ChunkStream(Paths.get(fileName), Main.blockSize);
+		/*
+		 * Initialise Merkle tree.
+		 */
+		AChunkStream b = new ChunkStream(Paths.get(fileName), Main.blockSize);
 		Merkle m = new Merkle(b);
-		if (cmd.hasOption("m")) {
-			if (cmd.hasOption("p")) {
-				System.err.println("--multi and --proof options are mutually exclusive.");
+		System.err.println(m.toString());
+		
+		/*
+		 * Select behaviour.
+		 */
+		if(cmd.hasOption("m")) {
+			Main.numProofChunks = Integer.parseInt(cmd.getOptionValue("m"));
+			assert(Main.numProofChunks > 0 && Main.numProofChunks < 256);
+		} else {
+			Main.numProofChunks = 1;
+		}
+		
+		if (cmd.hasOption("p")) {
+			/*
+			 * Generate a proof.
+			 */
+			String optionValue = cmd.getOptionValue("p");
+			List<Integer> proofChunks;
+			if (cmd.hasOption("m") || optionValue.length() == 64) {
+				// Support for more than one chunk.
+				byte[] blockHash = DatatypeConverter.parseHexBinary(optionValue);
+				assert(blockHash.length == 32);
+				System.err.println("Creating proofs for " + Main.numProofChunks + " blocks using block hash " + optionValue + ".");
+				proofChunks = Main.getProofChunks(blockHash, Main.numProofChunks, b.fileChunks);
+			} else {
+				numProofChunks = 1;
+				int proofChunkNum = Integer.parseInt(cmd.getOptionValue("p"));
+				assert(proofChunkNum >= 0 && proofChunkNum < b.fileChunks);
+				proofChunks = new ArrayList<Integer>();
+				proofChunks.add(proofChunkNum);
 			}
-			byte[] blockHash = DatatypeConverter.parseHexBinary(cmd.getOptionValue("m"));
-			assert(blockHash.length == 32);
-			int numProofs = ContractGen.numProofChunks;
+			
 			byte[] proof = new byte[0];
-			for(int i=0;i<numProofs;i++) {
-				int proofChunk = (new BigInteger(1, blockHash)).mod(BigInteger.valueOf(b.fileChunks)).intValueExact();
-				System.err.println("Generating proof for chunk " + proofChunk + " (" + (i+1) + " out of " + numProofs + ").");
+			for(int i=0;i<proofChunks.size();i++) {
+				int proofChunk = proofChunks.get(i);
+				System.err.println("Generating proof for chunk " + proofChunk + " (" + (i+1) + " out of " + Main.numProofChunks + ").");
 				proof = Util.byteCombine(proof, m.proof(proofChunk));
 			}
-						
+			
 			if (cmd.hasOption("c") || cmd.hasOption("s")) {
+				//Print out the proof in a way that can be parsed in Web3/Geth for consumption by Ethereum.
 				System.out.print("[");
 				System.out.print("\"0x" + DatatypeConverter.printHexBinary(Util.slice(proof, 0, 32)) + "\"");
 				for (int i = 32; i < proof.length; i += 32) {
@@ -100,23 +140,11 @@ public class Main {
 			} else {
 				System.out.write(proof);
 			}
-		} else if (cmd.hasOption("p")) {
-			int proofBlockNum = Integer.parseInt(cmd.getOptionValue("p"));
-			byte[] proof = m.proof(proofBlockNum);
-			if (cmd.hasOption("c") || cmd.hasOption("s")) {
-				System.out.print("[");
-				System.out.print("\"0x" + DatatypeConverter.printHexBinary(Util.slice(proof, 0, 32)) + "\"");
-				for (int i = 32; i < proof.length; i += 32) {
-					System.out.print(", \"0x" + DatatypeConverter.printHexBinary(Util.slice(proof, i, i + 32)) + "\"");
-				}
-				System.out.println("]");
-				System.exit(0);
-			} else if (cmd.hasOption("h")) {
-				System.out.println(DatatypeConverter.printHexBinary(proof));
-			} else {
-				System.out.write(proof);
-			}
+			
 		} else if (cmd.hasOption("c") || cmd.hasOption("s")) {
+			/*
+			 * Generate a contract (and possibly a contract deployment script for Geth).
+			 */			
 			String contractSkeletonFile = Main.contractSkeletonFile;
 			String contract = ContractGen.generate(m, contractSkeletonFile);
 			if (cmd.hasOption("s")) {
@@ -133,5 +161,15 @@ public class Main {
 				System.out.write(m.rootHash());
 			}
 		}
+	}
+	
+	private static List<Integer> getProofChunks(byte[] blockHash, int numChunks, int fileChunks) {
+		List<Integer> res = new ArrayList<Integer>();
+		BigInteger blockHashInt = new BigInteger(blockHash);
+		for (int i = 0; i < numChunks; i++) {
+			res.add(blockHashInt.mod(BigInteger.valueOf(fileChunks)).intValueExact());
+			blockHashInt = Util.hash(blockHashInt);
+		}
+		return res;
 	}
 }
