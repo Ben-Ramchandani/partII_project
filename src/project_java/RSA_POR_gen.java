@@ -7,10 +7,11 @@ import java.util.Random;
 
 public class RSA_POR_gen {
 	public static final BigInteger TWO = BigInteger.valueOf(2);
-	public static final int len_lambda = 512;
+	public static final int len_lambda = 128;
 	public static final BigInteger len_N = BigInteger.valueOf(len_lambda * 2);
 	public static final BigInteger lambda = TWO.pow(len_lambda - 4);
 	public static final int len_v = 256;
+	public static final int len_v_bytes = len_v / 8;
 	public static final boolean printValues = false;
 	public BigInteger[] chunks;
 	public BigInteger[] tags;
@@ -36,7 +37,8 @@ public class RSA_POR_gen {
 		return a.multiply(a).mod(N);
 	}
 
-	public static void generate(PrintStream out) {
+	// TODO: put public and private parts in different files.
+	public static BigInteger generate(PrintStream out, PrintStream privateKeyOut) {
 		Random rand = new Random();
 
 		BigInteger p = BigInteger.probablePrime(len_lambda, rand);
@@ -74,9 +76,12 @@ public class RSA_POR_gen {
 		printBigInteger(N, out);
 		printBigInteger(g, out);
 		printBigInteger(e, out);
-		printBigInteger(d, out);
 		printBigInteger(v, out);
 		printBigInteger(len_N, out);
+
+		if (privateKeyOut != null) {
+			printBigInteger(d, privateKeyOut);
+		}
 
 		if (printValues) {
 			System.out.println("p: " + p);
@@ -91,6 +96,8 @@ public class RSA_POR_gen {
 			System.out.println("v: " + v);
 			System.out.println("len_N: " + len_N);
 		}
+		
+		return d;
 	}
 
 	// Find x, y such that ax + by = 1.

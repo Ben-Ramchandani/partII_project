@@ -35,7 +35,7 @@ public final class Util {
 		assert(i.length == 4);
 		byte[] hashTarget = Arrays.copyOf(k, 32);
 		for(int j=0;j<4;j++) {
-			hashTarget[j] = (byte) (hashTarget[j] ^ i[j]);
+			hashTarget[j+28] = (byte) (hashTarget[j+28] ^ i[j]);
 		}
 		return new BigInteger(1, Util.hash(hashTarget));
 	}

@@ -1,4 +1,5 @@
 pragma solidity ^0.4.0;
+
 contract FilePay {
     
     uint validFromBlock;
@@ -23,11 +24,11 @@ contract FilePay {
     	return validFromBlock;
     }
     
-    function submitProof(bytes32[PROOF_LENGTH_256_BITS] proof) returns (uint) {
+    function submitProof(uint T, uint M) returns (uint) {
         if(!validToCall()) {
             return 1;
         }
-        if(!validateProof(proof, proofBlock())) {
+        if(!validateRSAProof(getBlockHash(), T, M)) {
             return 2;
         }
         return 0;
@@ -39,54 +40,46 @@ contract FilePay {
             suicide(msg.sender);
         }
     }
-    
-    function test(bytes32 arg) returns (bytes32 res) {
-        return arg;
-    }
 
     function getBlockHash() returns (bytes32 hash) {
         return block.blockhash(validFromBlock);
     }
     
-    function proofBlock() returns (uint i) {
-        uint h = uint(block.blockhash(validFromBlock));
-        return h % BLOCKS_IN_FILE;
+    function validateRSAProof(bytes32 k, uint T, uint M) returns (bool res) {
+        bytes32 chunkKey = k;
+        bytes32 coefficientKey = sha3(k);
+        uint tau = powmod(T, RSA_CONST_E, RSA_CONST_N);
+        
+        for(uint j = 0; j < NUM_PROOF_CHUNKS; j++) {
+            uint i = uint(chunkKey) % BLOCKS_IN_FILE;
+            chunkKey = sha3(chunkKey);
+            uint W_i = HMAC(i, RSA_CONST_V);
+            uint a_i = HMAC(i, coefficientKey);
+            tau = mulmod(tau, powmod(W_i, a_i, RSA_CONST_N), RSA_CONST_N);
+        }
+        uint gm = powmod(RSA_CONST_G, M, RSA_CONST_N);
+        return gm == tau;
     }
     
-    function validateProof(bytes32[PROOF_LENGTH_256_BITS] memory proof, uint i)
-        returns (bool valid) {
-        bytes32 hash;
-        uint proofOffset = BLOCK_LENGTH_BYTES / 32;
-        bytes32[2] memory hashTarget;
+    function powmod(uint a, uint e, uint N) internal returns (uint res) {
         assembly {
-            hash:=sha3(proof, BLOCK_LENGTH_BYTES)
+            res:=1
+            a:=mod(a, N)
         }
-        for(uint n = 0; n < MERKLE_DEPTH; n++) {
-            bytes32 otherHash = proof[proofOffset];
-            if(i % 2 == 0) {
-                hashTarget[0] = hash;
-                hashTarget[1] = otherHash;
-            } else {
-                hashTarget[0] = otherHash;
-                hashTarget[1] = hash;
-            }
-            hash = sha3(hashTarget);
-            i /= 2;
-            proofOffset += 1;
-        }
-        return hash == ROOT_HASH;
-    }
-
-    function modPow(uint a, uint e, uint N) returns (uint res) {
-        res = 1;
-        a = a % N;
         while(e > 0) {
-            if(e % 2 == 1) {
+            if(e & 1 != 0) {
                 res = mulmod(res, a, N);
             }
-            a = mulmod(a, a, N);
-            e = e >> 1;
+            assembly {
+                a:= mulmod(a, a, N)
+                e:= div(e, 2)
+            }
         }
         return res;
     }
+    
+    function HMAC(uint i, bytes32 k) returns (uint res) {
+        return uint(sha3(uint(k) ^ i));
+    }
+
 }

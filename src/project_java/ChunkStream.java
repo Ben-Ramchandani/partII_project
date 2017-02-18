@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ChunkStream extends AChunkStream {
 	private final byte[] zeroArray;
@@ -17,6 +18,10 @@ public class ChunkStream extends AChunkStream {
 		this.fileSize = (int) in.size();
 		this.zeroArray = new byte[blockLen];
 		this.fileChunks = Util.divRoundUp(fileSize, this.chunkSize);
+	}
+	
+	public ChunkStream(String p, int blockLen) throws IOException {
+		this(Paths.get(p), blockLen);
 	}
 
 	public void readChunk(byte[] array) throws IOException {
