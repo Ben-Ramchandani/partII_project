@@ -32,7 +32,7 @@ public class RSA_Proof {
 	public String toString() {
 		System.out.println(T.toString());
 		System.out.println(M.toString());
-		return "[\"" + toETHHexString(T) + "\", \"" + toETHHexString(M) + "\"]";
+		return "\"" + toETHHexString(T) + "\", \"" + toETHHexString(M) + "\"";
 	}
 	
 	private String toETHHexString(BigInteger i) {

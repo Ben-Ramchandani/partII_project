@@ -7,7 +7,7 @@ import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 
 public class ContractGenerator {
-	public static final int blocksBeforeValid = 4;
+	public static final int blocksBeforeValid = 0;
 	public static final int lockInByBlocks = 2;
 	public static final double paymentMultiplyer = 1.0;
 

@@ -4,8 +4,8 @@
 	<classpathentry kind="src" path="lib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="E:/programming/lib/commons-cli-1.3.1.jar"/>
-	<classpathentry kind="lib" path="E:/programming/lib/SAPHIR.jar"/>
-	<classpathentry kind="lib" path="E:/programming/lib/JavaReedSolomon.jar"/>
+	<classpathentry kind="lib" path="/media/ben/hdd_free/programming/lib/commons-cli-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/media/ben/hdd_free/programming/lib/SAPHIR.jar"/>
+	<classpathentry kind="lib" path="/media/ben/hdd_free/programming/lib/JavaReedSolomon.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

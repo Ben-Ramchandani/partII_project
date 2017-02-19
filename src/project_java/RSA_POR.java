@@ -9,8 +9,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
-
 public class RSA_POR {
 
 	public static int maxChunksBits = 32;
@@ -37,7 +35,6 @@ public class RSA_POR {
 		N = new BigInteger(lines.remove(0), 16);
 		g = new BigInteger(lines.remove(0), 16);
 		e = new BigInteger(lines.remove(0), 16);
-		// d = new BigInteger(lines.remove(0), 16);
 		v = new byte[RSA_POR_gen.len_v_bytes];
 		byte[] vInt = new BigInteger(lines.remove(0), 16).toByteArray();
 		if (vInt.length > RSA_POR_gen.len_v_bytes) {
@@ -90,7 +87,7 @@ public class RSA_POR {
 
 	public void tagAll2(OutputStream out, BigInteger d) throws IOException {
 		in.reset();
-		
+
 		byte[] currentChunk = new byte[in.chunkSize];
 		for (int i = 0; i < in.fileChunks; i++) {
 			// System.err.print("Generating tag for chunk " + (i+1) + " out of "

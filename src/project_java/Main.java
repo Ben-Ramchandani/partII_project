@@ -19,10 +19,10 @@ public class Main {
 	// Must be a multiple of 32.
 	public static final int chunkSize = 32;
 	public static final int chunkSizeRSA = 16;
-	public static final String merkleContractSkeletonFile = "contract_lockin.sol";
+	public static final String merkleContractSkeletonFile = "contract.sol";
 	public static final String RSAContractSkeletonFile = "contract_RSA.sol";
 	public static final String scriptSkeletonFile = "geth_script.js";
-	public static final String contractName = "FilePayLockIn";
+	public static final String contractName = "FilePay";
 
 	public static void printUsage() {
 		System.err.println("Usage: merkle [Options] [File]");
@@ -144,15 +144,22 @@ public class Main {
 		}
 	}
 	
+	public static byte[] parseBlockHash(String in) {
+		if(in.length() == 66) {
+			in = in.substring(2);
+		}
+		byte[] blockHash = DatatypeConverter.parseHexBinary(in);
+		assert (blockHash.length == 32);
+		return blockHash;
+	}
+	
 	public static List<Integer> getProofChunks(CommandLine cmd, int fileChunks) {
 		assert(cmd.hasOption("p"));
 		int numProofChunks = Main.numProofChunks(cmd);
 		String proofArg = cmd.getOptionValue("p");
 		
-		if (numProofChunks > 1 || proofArg.length() == 64) {
-			// Try to parse as a block hash.
-			byte[] blockHash = DatatypeConverter.parseHexBinary(proofArg);
-			assert (blockHash.length == 32);
+		if (numProofChunks > 1 || proofArg.length() == 64 || proofArg.length() == 66) {
+			byte[] blockHash = Main.parseBlockHash(proofArg);
 			return Main.getProofChunks(blockHash, numProofChunks, fileChunks);
 		} else {
 			int proofChunkNum = Integer.parseInt(cmd.getOptionValue("p"));
@@ -163,13 +170,13 @@ public class Main {
 		}
 	}
 
-	public static List<Integer> getProofChunks(byte[] blockHash, int numChunks, int fileChunks) {		
+	public static List<Integer> getProofChunks(byte[] blockHash, int numChunks, int fileChunks) {
 		List<Integer> res = new ArrayList<Integer>();
-		BigInteger blockHashInt = new BigInteger(1, blockHash);
 		for (int i = 0; i < numChunks; i++) {
-			res.add(blockHashInt.mod(BigInteger.valueOf(fileChunks)).intValueExact());
-			blockHashInt = Util.hash(blockHashInt);
+			res.add((new BigInteger(1, blockHash)).mod(BigInteger.valueOf(fileChunks)).intValueExact());
+			blockHash = Util.hash(blockHash);
 		}
+		System.out.println("res: " + res);
 		return res;
 	}
 	

@@ -11,13 +11,8 @@ contract FilePay {
     }
     
     function validToCall() returns (bool) {
-        if(
-            block.number <= validFromBlock
-            || block.number > validFromBlock + 255) {
-            return false;
-        } else {
-            return true;
-        }
+        return block.number > validFromBlock &&
+            block.number <= validFromBlock + 255;
     }
     
     function getValidFrom() returns (uint) {
@@ -31,8 +26,7 @@ contract FilePay {
         if(!validateRSAProof(getBlockHash(), T, M)) {
             return 2;
         }
-        return 0;
-        /*suicide(msg.sender);*/
+        suicide(msg.sender);
     }
     
     function recover() {
@@ -54,7 +48,7 @@ contract FilePay {
             uint i = uint(chunkKey) % BLOCKS_IN_FILE;
             chunkKey = sha3(chunkKey);
             uint W_i = HMAC(i, RSA_CONST_V);
-            uint a_i = HMAC(i, coefficientKey);
+            uint a_i = HMAC(i, coefficientKey) & 0xffffffffffffffff;
             tau = mulmod(tau, powmod(W_i, a_i, RSA_CONST_N), RSA_CONST_N);
         }
         uint gm = powmod(RSA_CONST_G, M, RSA_CONST_N);
@@ -62,18 +56,14 @@ contract FilePay {
     }
     
     function powmod(uint a, uint e, uint N) internal returns (uint res) {
-        assembly {
-            res:=1
-            a:=mod(a, N)
-        }
+        assembly {res:= 1}
+        assembly {a:= mod(a, N)}
         while(e > 0) {
             if(e & 1 != 0) {
                 res = mulmod(res, a, N);
             }
-            assembly {
-                a:= mulmod(a, a, N)
-                e:= div(e, 2)
-            }
+            assembly {a:= mulmod(a, a, N)}
+            assembly {e:= div(e, 2)}
         }
         return res;
     }

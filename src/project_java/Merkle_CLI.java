@@ -35,7 +35,7 @@ public class Merkle_CLI {
 		String contract = ContractGenerator.generate(merkle, contractSkeletonFile, Main.numProofChunks(cmd));
 		if (cmd.hasOption("s")) {
 			String scriptSkeletonFile = Main.scriptSkeletonFile;
-			String script = ScriptGen.generate(scriptSkeletonFile, contract, Main.contractName);
+			String script = ScriptGenerator.generate(scriptSkeletonFile, contract, Main.contractName, cmd.getArgs()[0], Main.numProofChunks(cmd), false);
 			out.println(script);
 		} else {
 			out.println(contract);

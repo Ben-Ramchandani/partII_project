@@ -5,8 +5,6 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
-
 public class RSA_POR_Challenge {
 	public RSA_POR parent;
 	public final byte[] chunkKey;
@@ -85,15 +83,14 @@ public class RSA_POR_Challenge {
 		BigInteger T = proof.T;
 		BigInteger M = proof.M;
 		List<Integer> chunkSet = getChunkSet();
-		
-		
+
 		System.out.println("N: " + parent.N);
 		System.out.println("g: " + parent.g);
 		System.out.println("e: " + parent.e);
 		System.out.println("v: " + new BigInteger(1, parent.v));
 		System.out.println("cs: " + parent.in.chunkSize);
 		System.out.println("fc: " + parent.in.fileChunks);
-		
+
 		System.out.println("T: " + T);
 		System.out.println("M: " + M);
 		System.out.println("coefficientKey: " + new BigInteger(1, coefficientKey));
@@ -119,7 +116,7 @@ public class RSA_POR_Challenge {
 		// We check g^M == tau
 		BigInteger gM = parent.g.modPow(M, parent.N);
 		System.out.println("gM: " + gM);
-		
+
 		assert (BigInteger.valueOf(M.bitLength()).compareTo(RSA_POR_gen.lambda) < 0);
 		return gM.equals(tau);
 	}
