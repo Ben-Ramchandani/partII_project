@@ -36,7 +36,7 @@ contract FilePay {
                 return 2;
             }
             assembly {
-                proof := add(proof, SINGLE_CHUNK_PROOF_LENGTH)
+                proof := add(proof, SINGLE_CHUNK_PROOF_LENGTH_BYTES)
             }
             currentHash = sha3(currentHash);
         }
@@ -58,11 +58,10 @@ contract FilePay {
         return block.blockhash(validFromBlock);
     }
     
-    function proofBlocks() returns (uint[NUM_PROOF_CHUNKS] chunks) {
-        uint[NUM_PROOF_CHUNKS] memory chunks;
-        bytes32 currenthash = block.blockhash(validFromBlock);
+    function proofBlocks() returns (uint[NUM_PROOF_CHUNKS] memory chunks) {
+        bytes32 currentHash = block.blockhash(validFromBlock);
         for(uint i = 0; i < NUM_PROOF_CHUNKS; i++) {
-            chunks[i] = uint(currenthash) % BLOCKS_IN_FILE;
+            chunks[i] = uint(currentHash) % BLOCKS_IN_FILE;
             currentHash = sha3(currentHash);
         }
         return chunks;

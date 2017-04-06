@@ -19,7 +19,7 @@ public class Main {
 	// Must be a multiple of 32.
 	public static final int chunkSize = 64;
 	public static final int chunkSizeRSA = 16;
-	public static final String merkleContractSkeletonFile = "contract.sol";
+	public static final String merkleContractSkeletonFile = "contract_multichunk.sol";
 	public static final String RSAContractSkeletonFile = "contract_RSA.sol";
 	public static final String scriptSkeletonFile = "geth_script.js";
 	public static final String contractName = "FilePay";
@@ -191,7 +191,6 @@ public class Main {
 			res.add((new BigInteger(1, blockHash)).mod(BigInteger.valueOf(fileChunks)).intValueExact());
 			blockHash = Util.hash(blockHash);
 		}
-		System.out.println("res: " + res);
 		return res;
 	}
 

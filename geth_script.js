@@ -38,8 +38,8 @@ filepay.status = function () {
 	}
 }
 
-console.log("Running miner for two blocks...");
-miner.start(); admin.sleepBlocks(2); miner.stop();
+console.log("Running miner for one block...");
+miner.start(); admin.sleepBlocks(1); miner.stop();
 console.log("Complete");
 
 var simpleCallback = function(e, res) {

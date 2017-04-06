@@ -5,26 +5,28 @@ import java.util.Random;
 
 public class RandomStream extends AChunkStream {
 	
-	Random r;
+	Random rand;
 
 	public RandomStream(int fileSize, int blockLen) throws IOException {
 		this.chunkSize = blockLen;
 		this.fileSize = fileSize;
 		this.fileChunks = Util.divRoundUp(fileSize, this.chunkSize);
-		this.r = new Random(1);
+		this.rand = new Random(1);
 	}
 
 	public void readChunk(byte[] array) throws IOException {
 		assert (array.length == this.chunkSize);
-		r.nextBytes(array);
+		rand.nextBytes(array);
 	}
 
-	public void reset() throws IOException {}
+	public void reset() throws IOException {
+		this.rand = new Random(1);
+	}
 
 	public byte[] getChunk(long i) throws IOException {
 		assert (i < fileChunks);
 		byte[] array = new byte[chunkSize];
-		r.nextBytes(array);
+		rand.nextBytes(array);
 		return array;
 	}
 }
