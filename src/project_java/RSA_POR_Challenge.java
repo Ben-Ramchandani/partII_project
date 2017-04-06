@@ -10,6 +10,7 @@ public class RSA_POR_Challenge {
 	public final byte[] coefficientKey;
 	public final int numChunksProof;
 	public final byte[] blockHash;
+	public final boolean force_ai_one = false;
 
 	public RSA_POR_Challenge(RSA_POR parent, byte[] blockHash) {
 		this.parent = parent;
@@ -24,8 +25,12 @@ public class RSA_POR_Challenge {
 	}
 
 	public BigInteger getCoefficient(int chunkIndex) {
-		// The lower 16 bytes of the hash result.
-		return Util.EVM_HMAC(chunkIndex, coefficientKey).and(new BigInteger("ffffffffffffffff", 16));
+		if (force_ai_one) {
+			return BigInteger.ONE;
+		} else {
+			// The lower 16 bytes of the hash result.
+			return Util.EVM_HMAC(chunkIndex, coefficientKey).and(new BigInteger("ffffffffffffffff", 16));
+		}
 	}
 
 	public RSA_Proof genProof(AChunkStream tags) throws IOException {
@@ -41,8 +46,8 @@ public class RSA_POR_Challenge {
 		for (int i = 0; i < chunkSet.size(); i++) {
 
 			int chunkIndex = chunkSet.get(i);
-			System.out.println("Generating proof on chunk " + chunkIndex + " (" + (i + 1) + " out of "
-					+ chunkSet.size() + ").");
+			System.err.print("Generating proof on chunk " + chunkIndex + " (" + (i + 1) + " out of "
+					+ chunkSet.size() + ").\r");
 			BigInteger chunk = new BigInteger(1, parent.in.getChunk(chunkIndex));
 			BigInteger a = getCoefficient(chunkIndex);
 			BigInteger chunkTag = new BigInteger(tags.getChunk(chunkIndex));
@@ -51,7 +56,7 @@ public class RSA_POR_Challenge {
 
 			M = M.add(chunk.multiply(a));
 		}
-
+		System.out.println();
 		return new RSA_Proof(T, M);
 	}
 

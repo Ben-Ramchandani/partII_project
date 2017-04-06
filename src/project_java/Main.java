@@ -127,7 +127,6 @@ public class Main {
 			} else {
 				b = new ChunkStream(fileName, Main.chunkSizeRSA);
 			}
-			System.out.println(b.fileChunks);
 
 			RSA_CLI cli = new RSA_CLI(cmd, b, outFile, fileName);
 			if (cmd.hasOption("v")) {

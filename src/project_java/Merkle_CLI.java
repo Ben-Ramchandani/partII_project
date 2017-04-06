@@ -52,10 +52,11 @@ public class Merkle_CLI {
 		byte[] proof = new byte[0];
 		for (int i = 0; i < proofChunks.size(); i++) {
 			int proofChunk = proofChunks.get(i);
-			System.err.println("Generating proof for chunk " + proofChunk + " (" + (i + 1) + " out of "
-					+ proofChunks.size() + ").");
+			System.err.print("Generating proof for chunk " + proofChunk + " (" + (i + 1) + " out of "
+					+ proofChunks.size() + ").\r");
 			proof = Util.byteCombine(proof, merkle.proof(proofChunk));
 		}
+		System.err.println();
 
 		if (cmd.hasOption("c") || cmd.hasOption("s")) {
 			// Print out the proof in a way that can be parsed in Web3/Geth for
