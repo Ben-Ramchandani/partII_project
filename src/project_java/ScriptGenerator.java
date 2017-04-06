@@ -16,7 +16,7 @@ public class ScriptGenerator {
 		replacements.add(new Replacement("SCRIPT_CODE", contract.replaceAll("\n", "").replaceAll("    ", "")));
 		replacements.add(new Replacement("SCRIPT_NAME", contractName));
 		replacements
-				.add(new Replacement("SCRIPT_EXTRA_ARGS", (isRSA ? "-r" : "") + (isRandom ? "-z " + fileSize : "")));
+				.add(new Replacement("SCRIPT_EXTRA_ARGS", (isRSA ? "-r" : "") + (isRandom ? " -z " + fileSize : "")));
 		String scriptSkeleton = Util.readFile(scriptSkeletonFile);
 
 		for (Replacement replacement : replacements) {

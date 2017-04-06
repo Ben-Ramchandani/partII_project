@@ -18,6 +18,7 @@ import org.apache.commons.cli.ParseException;
 public class Main {
 	// Must be a multiple of 32.
 	public static final int chunkSize = 64;
+	// Must be less than 32
 	public static final int chunkSizeRSA = 16;
 	public static final String merkleContractSkeletonFile = "contract_multichunk.sol";
 	public static final String RSAContractSkeletonFile = "contract_RSA.sol";
@@ -77,7 +78,7 @@ public class Main {
 		Option verify = new Option("v", "verify", true, "Verify an existing proof.");
 		options.addOption(verify);
 
-		Option zero = new Option("z", "zero", true, "Read from /dev/zero with the specified file size.");
+		Option zero = new Option("z", "rand", true, "Generate a random file on-the-fly.");
 		options.addOption(zero);
 
 		CommandLineParser parser = new DefaultParser();
@@ -98,7 +99,7 @@ public class Main {
 				System.exit(1);
 				return;
 			} else {
-				fileName = "dev/random";
+				fileName = "test_files/rand";
 			}
 		} catch (ParseException e) {
 			System.err.println(e.getMessage());
@@ -126,7 +127,9 @@ public class Main {
 			} else {
 				b = new ChunkStream(fileName, Main.chunkSizeRSA);
 			}
-			RSA_CLI cli = new RSA_CLI(cmd, b, outFile);
+			System.out.println(b.fileChunks);
+
+			RSA_CLI cli = new RSA_CLI(cmd, b, outFile, fileName);
 			if (cmd.hasOption("v")) {
 				assert (cmd.hasOption("p")) : "Verify requires a block hash be specified with -p.";
 				cli.verifyProof();

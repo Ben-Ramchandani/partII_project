@@ -23,7 +23,8 @@ public class ContractGenerator {
 
 		ArrayList<Replacement> replacements = new ArrayList<Replacement>();
 
-		// Can't add negative int constants to uints in Solidity, but taking away positive numbers is fine.
+		// Can't add negative int constants to uints in Solidity, but taking
+		// away positive numbers is fine.
 		replacements.add(new Replacement("PM_BLOCKS_BEFORE_VALID", (blocksBeforeValid > 0 ? "+" : "")
 				+ Integer.toString(blocksBeforeValid)));
 		replacements.add(new Replacement("ROOT_HASH", "0x" + DatatypeConverter.printHexBinary(rootHash)));
@@ -50,11 +51,13 @@ public class ContractGenerator {
 		return contract;
 	}
 
+	@SuppressWarnings("unused")
 	public static String generate(RSA_POR rsa, String contractSkeletonFile) throws IOException {
 		ArrayList<Replacement> replacements = new ArrayList<Replacement>();
 		assert (rsa.len_N <= 256);
 
-		replacements.add(new Replacement("BLOCKS_BEFORE_VALID", Integer.toString(blocksBeforeValid)));
+		replacements.add(new Replacement("PM_BLOCKS_BEFORE_VALID", (blocksBeforeValid > 0 ? "+" : "")
+				+ Integer.toString(blocksBeforeValid)));
 		replacements.add(new Replacement("BLOCKS_IN_FILE", Long.toString(rsa.in.fileChunks)));
 		// replacements.add(new Replacement("BLOCK_LENGTH_BYTES",
 		// Integer.toString(rsa.in.chunkSize)));

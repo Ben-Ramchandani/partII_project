@@ -6,8 +6,6 @@ import java.io.PrintStream;
 import java.math.BigInteger;
 import java.nio.file.Paths;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.commons.cli.CommandLine;
 
 public class RSA_CLI {
@@ -17,11 +15,11 @@ public class RSA_CLI {
 	public AChunkStream stream;
 	public PrintStream out;
 
-	public RSA_CLI(CommandLine cmd, AChunkStream stream, PrintStream outFile) throws IOException {
+	public RSA_CLI(CommandLine cmd, AChunkStream stream, PrintStream outFile, String fileName) throws IOException {
 		this.cmd = cmd;
 		this.stream = stream;
 		this.out = outFile;
-		this.fileName = cmd.getArgs()[0];
+		this.fileName = fileName;
 	}
 
 	private String keyFile() {
@@ -45,9 +43,9 @@ public class RSA_CLI {
 	}
 
 	private void tagFile(BigInteger privateKey) throws IOException {
-		AChunkStream stream = new ChunkStream(Paths.get("test_files/pic.png"), Main.chunkSizeRSA);
+		AChunkStream stream = new ChunkStream(Paths.get(fileName), Main.chunkSizeRSA);
 		RSA_POR r = new RSA_POR(keyFile(), stream, 10);
-		r.tagAll2(new FileOutputStream(tagsFile()), privateKey);
+		r.tagAll(new FileOutputStream(tagsFile()), privateKey);
 	}
 
 	public void generateAndTag() throws IOException {
@@ -63,9 +61,6 @@ public class RSA_CLI {
 		byte[] blockHash = Main.parseBlockHash(cmd.getOptionValue("p"));
 
 		int numProofChunks = Main.numProofChunks(cmd);
-
-		System.err.println("Generating proof for " + numProofChunks + " chunks using block hash \"0x"
-				+ DatatypeConverter.printHexBinary(blockHash) + "\".");
 
 		RSA_POR r = new RSA_POR(keyFile(), stream, numProofChunks);
 		RSA_POR_Challenge chal = new RSA_POR_Challenge(r, blockHash);
@@ -83,8 +78,6 @@ public class RSA_CLI {
 	public void verifyProof() throws IOException {
 
 		byte[] blockHash = Main.parseBlockHash(cmd.getOptionValue("p"));
-
-		System.out.println(Main.getProofChunks(blockHash, 1, stream.fileChunks));
 
 		int numProofChunks = Main.numProofChunks(cmd);
 

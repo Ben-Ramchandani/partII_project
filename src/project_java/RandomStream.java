@@ -26,7 +26,8 @@ public class RandomStream extends AChunkStream {
 	public byte[] getChunk(long i) throws IOException {
 		assert (i < fileChunks);
 		byte[] array = new byte[chunkSize];
-		rand.nextBytes(array);
+		Random tempRand = new Random(i);
+		tempRand.nextBytes(array);
 		return array;
 	}
 }

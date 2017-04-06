@@ -30,8 +30,6 @@ public class RSA_Proof {
 	
 	@Override
 	public String toString() {
-		System.out.println(T.toString());
-		System.out.println(M.toString());
 		return "\"" + toETHHexString(T) + "\", \"" + toETHHexString(M) + "\"";
 	}
 	
@@ -44,7 +42,6 @@ public class RSA_Proof {
 	}
 	
 	public void printTo(PrintStream out) {
-		out.println(T.toString(16));
-		out.println(M.toString(16));
+		out.println(this.toString());
 	}
 }

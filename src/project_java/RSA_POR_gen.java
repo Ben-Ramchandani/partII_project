@@ -20,8 +20,7 @@ public class RSA_POR_gen {
 		out.println(num.toString(16));
 	}
 
-	// This isn't really necessary for large p, q as the change of the loop
-	// repeating is tiny.
+	// This doesn't actually do anything useful since I'm not currently using safe primes.
 	public static BigInteger findGenerator(BigInteger p, BigInteger q, BigInteger N) {
 		BigInteger a;
 		Random rand = new Random();
@@ -37,7 +36,7 @@ public class RSA_POR_gen {
 		return a.multiply(a).mod(N);
 	}
 
-	// TODO: put public and private parts in different files.
+
 	public static BigInteger generate(PrintStream out, PrintStream privateKeyOut) {
 		Random rand = new Random();
 

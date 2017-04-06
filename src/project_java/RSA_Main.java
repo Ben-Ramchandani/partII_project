@@ -54,7 +54,7 @@ public class RSA_Main {
 
 		BigInteger privateKey = new BigInteger("2d9825406afa991f3adbced720ae7f8aabd6d858936677bc9e340f0d332a1e05", 16);
 
-		r.tagAll2(new FileOutputStream(new File("test_files/pic.png.tags")), privateKey);
+		r.tagAll(new FileOutputStream(new File("test_files/pic.png.tags")), privateKey);
 
 		// Random rand = new Random();
 		// byte[] blockHash = new byte[256];

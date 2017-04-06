@@ -38,7 +38,8 @@ public class RSA_POR {
 		v = new byte[RSA_POR_gen.len_v_bytes];
 		byte[] vInt = new BigInteger(lines.remove(0), 16).toByteArray();
 		if (vInt.length > RSA_POR_gen.len_v_bytes) {
-			// Because BigInteger allows for signed numbers.
+			// Because BigInteger allows for signed numbers it uses two's
+			// complement and may put a zero byte on the front.
 			assert (vInt.length == 1 + RSA_POR_gen.len_v_bytes && vInt[0] == 0);
 			System.arraycopy(vInt, 1, v, 0, RSA_POR_gen.len_v_bytes);
 		} else {
@@ -56,17 +57,6 @@ public class RSA_POR {
 	}
 
 	public BigInteger tagChunk(byte[] chunkBytes, int chunkIndex, BigInteger d) {
-		// T_i = (h(W_i) * g^(b_i))^d
-		BigInteger chunk = new BigInteger(1, chunkBytes);
-		BigInteger hW_i = gethW_i(chunkIndex);
-		BigInteger g_to_chunk = g.modPow(chunk, N);
-		BigInteger mult = hW_i.multiply(g_to_chunk);
-		assert (chunk.compareTo(BigInteger.ZERO) >= 0);
-		return mult.modPow(d, N);
-	}
-
-	public BigInteger tagChunk2(byte[] chunkBytes, int chunkIndex, BigInteger d) {
-		// T_i = (h(W_i)^-1 * g^(b_i))^d
 		BigInteger chunk = new BigInteger(1, chunkBytes);
 		BigInteger hW_i = gethW_i(chunkIndex);
 		BigInteger hW_i_inverse = hW_i.modInverse(N);
@@ -85,30 +75,11 @@ public class RSA_POR {
 		return tagBytesPadded;
 	}
 
-	public void tagAll2(OutputStream out, BigInteger d) throws IOException {
-		in.reset();
-
-		byte[] currentChunk = new byte[in.chunkSize];
-		for (int i = 0; i < in.fileChunks; i++) {
-			// System.err.print("Generating tag for chunk " + (i+1) + " out of "
-			// + in.fileChunks + ".\r");
-
-			in.readChunk(currentChunk);
-			BigInteger tagInt = tagChunk2(currentChunk, i, d);
-			assert (tagInt.compareTo(BigInteger.ZERO) >= 0);
-			byte[] tagBytes = padTag(tagInt.toByteArray());
-			out.write(tagBytes);
-
-			test_tags.add(tagInt);
-		}
-	}
-
 	public void tagAll(OutputStream out, BigInteger d) throws IOException {
 		in.reset();
+
 		byte[] currentChunk = new byte[in.chunkSize];
 		for (int i = 0; i < in.fileChunks; i++) {
-			System.err.print("Generating tag for chunk " + i + " out of " + in.fileChunks + ".\r");
-
 			in.readChunk(currentChunk);
 			BigInteger tagInt = tagChunk(currentChunk, i, d);
 			assert (tagInt.compareTo(BigInteger.ZERO) >= 0);
