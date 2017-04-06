@@ -13,7 +13,7 @@ contract FilePayLockIn {
         owner = msg.sender;
         interestValue = msg.value;
         lockInByBlock = block.number + LOCK_IN_BY_BLOCKS;
-        validAfterBlock = block.number + BLOCKS_BEFORE_VALID;
+        validAfterBlock = block.number PM_BLOCKS_BEFORE_VALID;
     }
 
     function lockIn() payable {

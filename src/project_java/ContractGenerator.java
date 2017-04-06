@@ -7,10 +7,11 @@ import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 
 public class ContractGenerator {
-	public static final int blocksBeforeValid = 0;
+	public static final int blocksBeforeValid = -1;
 	public static final int lockInByBlocks = 2;
 	public static final double paymentMultiplyer = 1.0;
 
+	@SuppressWarnings("unused")
 	public static String generate(Merkle merkleTree, String contractSkeletonFile, int numProofChunks) throws IOException {
 
 		int depth = merkleTree.depth;
@@ -21,7 +22,8 @@ public class ContractGenerator {
 
 		ArrayList<Replacement> replacements = new ArrayList<Replacement>();
 
-		replacements.add(new Replacement("BLOCKS_BEFORE_VALID", Integer.toString(blocksBeforeValid)));
+		//Can't add negative int constants to uints in Solidity
+		replacements.add(new Replacement("PM_BLOCKS_BEFORE_VALID", (blocksBeforeValid > 0 ? "+" : "-") + Integer.toString(blocksBeforeValid)));
 		replacements.add(new Replacement("ROOT_HASH", "0x" + DatatypeConverter.printHexBinary(rootHash)));
 		replacements.add(new Replacement("BLOCKS_IN_FILE", Long.toString(fileChunks)));
 		replacements.add(new Replacement("BLOCK_LENGTH_BYTES", Integer.toString(blockSize)));

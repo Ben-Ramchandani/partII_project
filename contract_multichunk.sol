@@ -6,7 +6,7 @@ contract FilePay {
     
     function FilePay() {
         owner = msg.sender;
-        validFromBlock = block.number + BLOCKS_BEFORE_VALID;
+        validFromBlock = block.number PM_BLOCKS_BEFORE_VALID;
     }
     
     function validToCall() returns (bool) {

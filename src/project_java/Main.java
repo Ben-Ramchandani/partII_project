@@ -17,7 +17,7 @@ import org.apache.commons.cli.ParseException;
 
 public class Main {
 	// Must be a multiple of 32.
-	public static final int chunkSize = 32;
+	public static final int chunkSize = 64;
 	public static final int chunkSizeRSA = 16;
 	public static final String merkleContractSkeletonFile = "contract.sol";
 	public static final String RSAContractSkeletonFile = "contract_RSA.sol";
@@ -26,14 +26,14 @@ public class Main {
 
 	public static void printUsage() {
 		System.err.println("Usage: merkle [Options] [File]");
-		System.err.println(
-				"-p, --proof <block_num | block_hash>: An integer representing a chunk index or a hez string representing a block hash,"
+		System.err
+				.println("-p, --proof <block_num | block_hash>: An integer representing a chunk index or a hez string representing a block hash,"
 						+ "generate a proof for this chunk, or for chunks based on the block hash provided.");
 		System.err.println("-h, --hex: Print the resulting hash as a hexadecimal value.");
 		System.err.println("-c, --contract: Generate a contract for this file.");
 		System.err.println("-s, --script: Generate a deployment script for this file.");
-		System.err.println(
-				"-m, --multi: Generate proofs for the number of chunks provided. --proof is required and must be a blockhash.");
+		System.err
+				.println("-m, --multi: Generate proofs for the number of chunks provided. --proof is required and must be a blockhash.");
 		System.err.println("-r, --rsa <file>: Use the given RSA keyfile.");
 	}
 
@@ -48,34 +48,37 @@ public class Main {
 				"An integer representing a chunk index or a hez string representing a block hash,"
 						+ "generate a proof for this chunk, or for chunks based on the block hash provided.");
 		options.addOption(proofBlock);
-		
+
 		Option printHex = new Option("h", "hex", false, "Print the resulting hash as a hexadecimal value.");
 		options.addOption(printHex);
-		
+
 		Option genContract = new Option("c", "contract", false, "Generate a contract for this file.");
 		options.addOption(genContract);
-		
+
 		Option genScript = new Option("s", "script", false, "Generate a deployment script for this file.");
 		options.addOption(genScript);
-		
+
 		Option multiProof = new Option("m", "multi", true,
 				"Generate proofs for the number of chunks provided. --proof is required and must be a blockhash.");
 		options.addOption(multiProof);
-		
+
 		Option useRSA = new Option("r", "rsa", false, "Use the RSA POR system.");
 		options.addOption(useRSA);
-		
+
 		Option tagRSA = new Option("t", "tags-rsa", true, "Use this RSA tag file.");
 		options.addOption(tagRSA);
-		
+
 		Option keyRSA = new Option("k", "keys-rsa", true, "Use this RSA key file.");
 		options.addOption(keyRSA);
-		
+
 		Option out = new Option("o", "out", true, "File to print to (defaults to stdout).");
 		options.addOption(out);
-		
+
 		Option verify = new Option("v", "verify", true, "Verify an existing proof.");
 		options.addOption(verify);
+
+		Option zero = new Option("z", "zero", true, "Read from /dev/zero with the specified file size.");
+		options.addOption(zero);
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd;
@@ -88,12 +91,14 @@ public class Main {
 			String[] leftOver = cmd.getArgs();
 			if (leftOver.length > 0) {
 				fileName = leftOver[0];
-			} else {
+			} else if (!cmd.hasOption("z")) {
 				System.err.println("No file specified.");
 				HelpFormatter h = new HelpFormatter();
 				h.printHelp("filepay <options> <file>", options);
 				System.exit(1);
 				return;
+			} else {
+				fileName = "dev/random";
 			}
 		} catch (ParseException e) {
 			System.err.println(e.getMessage());
@@ -111,15 +116,19 @@ public class Main {
 			outFile = new PrintStream(cmd.getOptionValue("o"));
 		}
 
-		
 		if (cmd.hasOption("r")) {
 			/*
 			 * RSA
 			 */
-			AChunkStream b = new ChunkStream(fileName, Main.chunkSizeRSA);
+			AChunkStream b;
+			if (cmd.hasOption("z")) {
+				b = new RandomStream(Integer.parseInt(cmd.getOptionValue("z")), Main.chunkSizeRSA);
+			} else {
+				b = new ChunkStream(fileName, Main.chunkSizeRSA);
+			}
 			RSA_CLI cli = new RSA_CLI(cmd, b, outFile);
-			if(cmd.hasOption("v")) {
-				assert(cmd.hasOption("p")): "Verify requires a block hash be specified with -p.";
+			if (cmd.hasOption("v")) {
+				assert (cmd.hasOption("p")) : "Verify requires a block hash be specified with -p.";
 				cli.verifyProof();
 			} else if (cmd.hasOption("p")) {
 				cli.generateProof();
@@ -132,7 +141,13 @@ public class Main {
 			/*
 			 * Merkle
 			 */
-			AChunkStream b = new ChunkStream(fileName, Main.chunkSize);
+			AChunkStream b;
+
+			if (cmd.hasOption("z")) {
+				b = new RandomStream(Integer.parseInt(cmd.getOptionValue("z")), Main.chunkSize);
+			} else {
+				b = new ChunkStream(fileName, Main.chunkSize);
+			}
 			Merkle_CLI cli = new Merkle_CLI(cmd, b, outFile);
 			if (cmd.hasOption("p")) {
 				cli.generateProof();
@@ -143,21 +158,21 @@ public class Main {
 			}
 		}
 	}
-	
+
 	public static byte[] parseBlockHash(String in) {
-		if(in.length() == 66) {
+		if (in.length() == 66) {
 			in = in.substring(2);
 		}
 		byte[] blockHash = DatatypeConverter.parseHexBinary(in);
 		assert (blockHash.length == 32);
 		return blockHash;
 	}
-	
+
 	public static List<Integer> getProofChunks(CommandLine cmd, int fileChunks) {
-		assert(cmd.hasOption("p"));
+		assert (cmd.hasOption("p"));
 		int numProofChunks = Main.numProofChunks(cmd);
 		String proofArg = cmd.getOptionValue("p");
-		
+
 		if (numProofChunks > 1 || proofArg.length() == 64 || proofArg.length() == 66) {
 			byte[] blockHash = Main.parseBlockHash(proofArg);
 			return Main.getProofChunks(blockHash, numProofChunks, fileChunks);
@@ -179,7 +194,7 @@ public class Main {
 		System.out.println("res: " + res);
 		return res;
 	}
-	
+
 	public static int numProofChunks(CommandLine cmd) {
 		int res = 1;
 		if (cmd.hasOption("m")) {

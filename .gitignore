@@ -1,6 +1,7 @@
 bin/
 test_files/
 lib/
+*.jar
 
 #Eclipse
 .project
@@ -14,5 +15,8 @@ lib/
 *.log
 *.pdf
 *.synctex.gz
+*.blg
+*.bbl
 
+#gedit
 *~

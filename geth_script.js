@@ -16,6 +16,7 @@ var filepay = fpContract.new({ from: primary, data: fpCompiled.SCRIPT_NAME.code,
 			console.log("Contract transaction send: TransactionHash: " + contract.transactionHash + " waiting to be mined...");
 		} else {
 			console.log("Contract mined! Address: " + contract.address);
+			filepay.status()
 		}
 	} else {
 		console.log("An error occurred.");
@@ -26,19 +27,19 @@ var filepay = fpContract.new({ from: primary, data: fpCompiled.SCRIPT_NAME.code,
 filepay.status = function () {
 	console.log("Contract is at address " + filepay.address + ".");
 	console.log("Current block is " + eth.blockNumber + ".");
-	console.log("Contract is valid from " + filepay.getValidFrom.call() + ".");
+	console.log("Contract is valid after block " + filepay.getValidFrom.call() + ".");
 	if (filepay.validToCall.call()) {
 		blockHash = filepay.getBlockHash.call();
 		console.log("Contract is ready to be paid, block hash is " + blockHash + ".");
 		console.log("To generate a proof run:");
-		console.log("filepay SCRIPT_FILE_NAME -p " + blockHash + " -c -m NUM_PROOF_CHUNKS SCRIPT_EXTRA_ARGS");
+		console.log("java -jar filepay.jar SCRIPT_FILE_NAME -p " + blockHash + " -c -m NUM_PROOF_CHUNKS SCRIPT_EXTRA_ARGS");
 	} else {
 		console.log("Contract reports not ready.");
 	}
 }
 
-console.log("Running miner for one block...");
-miner.start(); admin.sleepBlocks(1); miner.stop();
+console.log("Running miner for two blocks...");
+miner.start(); admin.sleepBlocks(2); miner.stop();
 console.log("Complete");
 
 var simpleCallback = function(e, res) {

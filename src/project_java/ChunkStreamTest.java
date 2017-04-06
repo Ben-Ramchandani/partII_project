@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-public class BlockStreamTest {
+public class ChunkStreamTest {
 
 	public static final String TEST_FILE_PATH = "test_files/";
 	public static final String testString = "abcdefghijklmnopqrstuvwxyz";

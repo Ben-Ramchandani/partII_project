@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class ScriptGenerator {
 
 	public static String generate(String scriptSkeletonFile, String contract, String contractName, String fileName,
-			int numProofChunks, boolean isRSA) throws IOException {
+			int numProofChunks, boolean isRSA, boolean isRandom, int fileSize) throws IOException {
 
 		ArrayList<Replacement> replacements = new ArrayList<Replacement>();
 
@@ -15,12 +15,18 @@ public class ScriptGenerator {
 		replacements.add(new Replacement("NUM_PROOF_CHUNKS", Integer.toString(numProofChunks)));
 		replacements.add(new Replacement("SCRIPT_CODE", contract.replaceAll("\n", "").replaceAll("    ", "")));
 		replacements.add(new Replacement("SCRIPT_NAME", contractName));
-		replacements.add(new Replacement("SCRIPT_EXTRA_ARGS", isRSA ? "-r" : ""));
+		replacements
+				.add(new Replacement("SCRIPT_EXTRA_ARGS", (isRSA ? "-r" : "") + (isRandom ? "-z " + fileSize : "")));
 		String scriptSkeleton = Util.readFile(scriptSkeletonFile);
 
 		for (Replacement replacement : replacements) {
 			scriptSkeleton = replacement.replace(scriptSkeleton);
 		}
 		return scriptSkeleton;
+	}
+
+	public static String generate(String scriptSkeletonFile, String contract, String contractName, String fileName,
+			int numProofChunks, boolean isRSA) throws IOException {
+		return generate(scriptSkeletonFile, contract, contractName, fileName, numProofChunks, isRSA, false, 0);
 	}
 }

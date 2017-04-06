@@ -63,8 +63,9 @@ public class RSA_CLI {
 		byte[] blockHash = Main.parseBlockHash(cmd.getOptionValue("p"));
 
 		int numProofChunks = Main.numProofChunks(cmd);
-		
-		System.err.println("Generating proof for " + numProofChunks + " chunks using block hash \"0x" + DatatypeConverter.printHexBinary(blockHash) + "\".");
+
+		System.err.println("Generating proof for " + numProofChunks + " chunks using block hash \"0x"
+				+ DatatypeConverter.printHexBinary(blockHash) + "\".");
 
 		RSA_POR r = new RSA_POR(keyFile(), stream, numProofChunks);
 		RSA_POR_Challenge chal = new RSA_POR_Challenge(r, blockHash);
@@ -78,11 +79,11 @@ public class RSA_CLI {
 			proof.printTo(out);
 		}
 	}
-	
+
 	public void verifyProof() throws IOException {
 
 		byte[] blockHash = Main.parseBlockHash(cmd.getOptionValue("p"));
-		
+
 		System.out.println(Main.getProofChunks(blockHash, 1, stream.fileChunks));
 
 		int numProofChunks = Main.numProofChunks(cmd);
@@ -90,8 +91,8 @@ public class RSA_CLI {
 		RSA_POR r = new RSA_POR(keyFile(), stream, numProofChunks);
 		RSA_POR_Challenge chal = new RSA_POR_Challenge(r, blockHash);
 		RSA_Proof proof = new RSA_Proof(cmd.getOptionValue("v"));
-		
-		if(chal.checkProof2(proof)) {
+
+		if (chal.checkProof2(proof)) {
 			out.println("Verified successfully");
 		} else {
 			out.println("Verify failed");
@@ -104,7 +105,8 @@ public class RSA_CLI {
 		String contract = ContractGenerator.generate(r, contractSkeletonFile);
 		if (cmd.hasOption("s")) {
 			String scriptSkeletonFile = Main.scriptSkeletonFile;
-			String script = ScriptGenerator.generate(scriptSkeletonFile, contract, Main.contractName, fileName, Main.numProofChunks(cmd), true);
+			String script = ScriptGenerator.generate(scriptSkeletonFile, contract, Main.contractName, fileName,
+					Main.numProofChunks(cmd), true, cmd.hasOption("z"), this.stream.fileSize);
 			out.println(script);
 		} else {
 			out.println(contract);
