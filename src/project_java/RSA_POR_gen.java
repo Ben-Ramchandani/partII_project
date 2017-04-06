@@ -41,11 +41,9 @@ public class RSA_POR_gen {
 		Random rand = new Random();
 
 		BigInteger p = BigInteger.probablePrime(len_lambda, rand);
-		// BigInteger pp = p.subtract(BigInteger.ONE).divide(TWO);
 		BigInteger pp = p.subtract(BigInteger.ONE);
 
 		BigInteger q = BigInteger.probablePrime(len_lambda, rand);
-		// BigInteger qq = q.subtract(BigInteger.ONE).divide(TWO);
 		BigInteger qq = q.subtract(BigInteger.ONE);
 
 		BigInteger N = p.multiply(q);

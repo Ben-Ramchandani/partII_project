@@ -2,7 +2,6 @@ package project_java;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Iterator;
 import java.util.List;
 
 public class RSA_POR_Challenge {
@@ -25,6 +24,7 @@ public class RSA_POR_Challenge {
 	}
 
 	public BigInteger getCoefficient(int chunkIndex) {
+		// The lower 16 bytes of the hash result.
 		return Util.EVM_HMAC(chunkIndex, coefficientKey).and(new BigInteger("ffffffffffffffff", 16));
 	}
 
@@ -41,8 +41,8 @@ public class RSA_POR_Challenge {
 		for (int i = 0; i < chunkSet.size(); i++) {
 
 			int chunkIndex = chunkSet.get(i);
-			System.out.println(
-					"Generating proof on chunk " + chunkIndex + " (" + (i + 1) + " out of " + chunkSet.size() + ").");
+			System.out.println("Generating proof on chunk " + chunkIndex + " (" + (i + 1) + " out of "
+					+ chunkSet.size() + ").");
 			BigInteger chunk = new BigInteger(1, parent.in.getChunk(chunkIndex));
 			BigInteger a = getCoefficient(chunkIndex);
 			BigInteger chunkTag = new BigInteger(tags.getChunk(chunkIndex));
@@ -56,30 +56,6 @@ public class RSA_POR_Challenge {
 	}
 
 	public boolean checkProof(RSA_Proof proof) {
-		BigInteger T = proof.T;
-		BigInteger M = proof.M;
-		List<Integer> chunkSet = getChunkSet();
-
-		// tau = T^e
-		BigInteger tau = T.modPow(parent.e, parent.N);
-
-		// tau = tau/(h(W_i)^(a_i)) for each i in chunkSet.
-		Iterator<Integer> it = chunkSet.iterator();
-		while (it.hasNext()) {
-			int chunkIndex = it.next();
-			BigInteger hW_i = parent.gethW_i(chunkIndex);
-			BigInteger a_i = getCoefficient(chunkIndex);
-			tau = tau.multiply(hW_i.modPow(a_i.negate(), parent.N)).mod(parent.N);
-		}
-
-		// We check g^M == tau
-		BigInteger gM = parent.g.modPow(M, parent.N);
-
-		assert (BigInteger.valueOf(M.bitLength()).compareTo(RSA_POR_gen.lambda) < 0);
-		return gM.equals(tau);
-	}
-
-	public boolean checkProof2(RSA_Proof proof) {
 		BigInteger T = proof.T;
 		BigInteger M = proof.M;
 		List<Integer> chunkSet = getChunkSet();
@@ -103,8 +79,8 @@ public class RSA_POR_Challenge {
 		// tau = tau*(h(W_i)^(a_i)) for each i in chunkSet.
 		for (int i = 0; i < chunkSet.size(); i++) {
 			int chunkIndex = chunkSet.get(i);
-			System.out.println(
-					"Verifying proof on chunk " + chunkIndex + " (" + (i + 1) + " out of " + chunkSet.size() + ").");
+			System.out.println("Verifying proof on chunk " + chunkIndex + " (" + (i + 1) + " out of " + chunkSet.size()
+					+ ").");
 			BigInteger hW_i = parent.gethW_i(chunkIndex);
 			System.out.println("W_i: " + hW_i);
 			BigInteger a_i = getCoefficient(chunkIndex);

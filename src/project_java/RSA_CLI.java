@@ -85,7 +85,7 @@ public class RSA_CLI {
 		RSA_POR_Challenge chal = new RSA_POR_Challenge(r, blockHash);
 		RSA_Proof proof = new RSA_Proof(cmd.getOptionValue("v"));
 
-		if (chal.checkProof2(proof)) {
+		if (chal.checkProof(proof)) {
 			out.println("Verified successfully");
 		} else {
 			out.println("Verify failed");

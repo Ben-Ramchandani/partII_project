@@ -13,6 +13,8 @@ public class ScriptGenerator {
 		// The name of the input file.
 		replacements.add(new Replacement("SCRIPT_FILE_NAME", fileName));
 		replacements.add(new Replacement("NUM_PROOF_CHUNKS", Integer.toString(numProofChunks)));
+		// JS doesn't have multi-line strings, so we strip out all new lines
+		// (have to be careful with line comments and EVM assembly).
 		replacements.add(new Replacement("SCRIPT_CODE", contract.replaceAll("\n", "").replaceAll("    ", "")));
 		replacements.add(new Replacement("SCRIPT_NAME", contractName));
 		replacements

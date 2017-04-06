@@ -67,8 +67,7 @@ public class RSA_POR {
 	}
 
 	public byte[] padTag(byte[] tagBytes) {
-		// We need the extra byte because BigInteger uses two's complement so it
-		// can represent negative values.
+		// We need the extra byte because BigInteger uses two's complement.
 		assert (tagBytes.length <= len_N + 1);
 		byte[] tagBytesPadded = new byte[len_N + 1];
 		System.arraycopy(tagBytes, 0, tagBytesPadded, len_N + 1 - tagBytes.length, tagBytes.length);
@@ -92,15 +91,5 @@ public class RSA_POR {
 
 	public static void printBigInteger(BigInteger num, PrintStream out) {
 		out.println(num.toString(16));
-	}
-
-	public List<Replacement> getReplacements() {
-		List<Replacement> res = new ArrayList<Replacement>();
-		assert (len_N <= 256);
-		res.add(new Replacement("RSA_CONST_E", this.e));
-		res.add(new Replacement("RSA_CONST_V", this.v));
-		res.add(new Replacement("RSA_CONST_G", this.g));
-		res.add(new Replacement("RSA_CONST_VN", this.N));
-		return res;
 	}
 }
