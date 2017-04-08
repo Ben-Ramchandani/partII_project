@@ -11,7 +11,7 @@ public class ZeroStream extends AChunkStream {
 
 	private SeekableByteChannel in;
 
-	public ZeroStream(int fileSize, int blockLen) throws IOException {
+	public ZeroStream(long fileSize, int blockLen) throws IOException {
 		this.in = Files.newByteChannel(Paths.get("/dev/zero"));
 		this.chunkSize = blockLen;
 		this.fileSize = fileSize;

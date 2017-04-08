@@ -123,7 +123,7 @@ public class Main {
 			 */
 			AChunkStream b;
 			if (cmd.hasOption("z")) {
-				b = new RandomStream(Integer.parseInt(cmd.getOptionValue("z")), Main.chunkSizeRSA);
+				b = new RandomStream(Long.parseLong(cmd.getOptionValue("z")), Main.chunkSizeRSA);
 			} else {
 				b = new ChunkStream(fileName, Main.chunkSizeRSA);
 			}
@@ -146,11 +146,11 @@ public class Main {
 			AChunkStream b;
 
 			if (cmd.hasOption("z")) {
-				b = new RandomStream(Integer.parseInt(cmd.getOptionValue("z")), Main.chunkSize);
+				b = new RandomStream(Long.parseLong(cmd.getOptionValue("z")), Main.chunkSize);
 			} else {
 				b = new ChunkStream(fileName, Main.chunkSize);
 			}
-			Merkle_CLI cli = new Merkle_CLI(cmd, b, outFile);
+			Merkle_CLI cli = new Merkle_CLI(cmd, b, outFile, fileName);
 			if (cmd.hasOption("p")) {
 				cli.generateProof();
 			} else if (cmd.hasOption("c") || cmd.hasOption("s")) {
@@ -170,7 +170,7 @@ public class Main {
 		return blockHash;
 	}
 
-	public static List<Integer> getProofChunks(CommandLine cmd, int fileChunks) {
+	public static List<Integer> getProofChunks(CommandLine cmd, long fileChunks) {
 		assert (cmd.hasOption("p"));
 		int numProofChunks = Main.numProofChunks(cmd);
 		String proofArg = cmd.getOptionValue("p");
@@ -187,7 +187,7 @@ public class Main {
 		}
 	}
 
-	public static List<Integer> getProofChunks(byte[] blockHash, int numChunks, int fileChunks) {
+	public static List<Integer> getProofChunks(byte[] blockHash, int numChunks, long fileChunks) {
 		List<Integer> res = new ArrayList<Integer>();
 		for (int i = 0; i < numChunks; i++) {
 			res.add((new BigInteger(1, blockHash)).mod(BigInteger.valueOf(fileChunks)).intValueExact());

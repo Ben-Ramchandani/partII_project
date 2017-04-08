@@ -5,8 +5,8 @@ import java.io.IOException;
 public abstract class AChunkStream {
 	
 	public int chunkSize;
-	public int fileSize;
-	public int fileChunks;
+	public long fileSize;
+	public long fileChunks;
 	
 	public abstract void readChunk(byte[] array) throws IOException;
 

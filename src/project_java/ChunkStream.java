@@ -15,7 +15,7 @@ public class ChunkStream extends AChunkStream {
 	public ChunkStream(Path p, int blockLen) throws IOException {
 		this.in = Files.newByteChannel(p);
 		this.chunkSize = blockLen;
-		this.fileSize = (int) in.size();
+		this.fileSize = in.size();
 		this.zeroArray = new byte[blockLen];
 		this.fileChunks = Util.divRoundUp(fileSize, this.chunkSize);
 	}

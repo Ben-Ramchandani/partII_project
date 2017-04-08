@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class ScriptGenerator {
 
 	public static String generate(String scriptSkeletonFile, String contract, String contractName, String fileName,
-			int numProofChunks, boolean isRSA, boolean isRandom, int fileSize) throws IOException {
+			int numProofChunks, boolean isRSA, boolean isRandom, long fileSize) throws IOException {
 
 		ArrayList<Replacement> replacements = new ArrayList<Replacement>();
 

@@ -7,7 +7,7 @@ public class RandomStream extends AChunkStream {
 	
 	Random rand;
 
-	public RandomStream(int fileSize, int blockLen) throws IOException {
+	public RandomStream(long fileSize, int blockLen) throws IOException {
 		this.chunkSize = blockLen;
 		this.fileSize = fileSize;
 		this.fileChunks = Util.divRoundUp(fileSize, this.chunkSize);

@@ -14,12 +14,14 @@ public class Merkle_CLI {
 	public AChunkStream stream;
 	public Merkle merkle;
 	public PrintStream out;
+	public String fileName;
 
-	public Merkle_CLI(CommandLine cmd, AChunkStream stream, PrintStream outFile) throws IOException {
+	public Merkle_CLI(CommandLine cmd, AChunkStream stream, PrintStream outFile, String fileName) throws IOException {
 		this.cmd = cmd;
 		this.stream = stream;
 		this.merkle = new Merkle(stream);
 		this.out = outFile;
+		this.fileName = fileName;
 	}
 
 	public void printRootHash() throws IOException {
@@ -35,7 +37,7 @@ public class Merkle_CLI {
 		String contract = ContractGenerator.generate(merkle, contractSkeletonFile, Main.numProofChunks(cmd));
 		if (cmd.hasOption("s")) {
 			String scriptSkeletonFile = Main.scriptSkeletonFile;
-			String script = ScriptGenerator.generate(scriptSkeletonFile, contract, Main.contractName, cmd.getArgs()[0],
+			String script = ScriptGenerator.generate(scriptSkeletonFile, contract, Main.contractName, fileName,
 					Main.numProofChunks(cmd), false, cmd.hasOption("z"), this.stream.fileSize);
 			out.println(script);
 		} else {

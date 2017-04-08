@@ -67,6 +67,14 @@ public final class Util {
 			return (x / y) + 1;
 		}
 	}
+	
+	public static long divRoundUp(long x, long y) {
+		if (x % y == 0) {
+			return x / y;
+		} else {
+			return (x / y) + 1;
+		}
+	}
 
 	public static int log2(long x) {
 		return 63 - Long.numberOfLeadingZeros(x);
