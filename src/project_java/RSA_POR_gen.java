@@ -20,7 +20,8 @@ public class RSA_POR_gen {
 		out.println(num.toString(16));
 	}
 
-	// This doesn't actually do anything useful since I'm not currently using safe primes.
+	// This doesn't actually do anything useful since I'm not currently using
+	// safe primes.
 	public static BigInteger findGenerator(BigInteger p, BigInteger q, BigInteger N) {
 		BigInteger a;
 		Random rand = new Random();
@@ -35,7 +36,6 @@ public class RSA_POR_gen {
 				|| aModq.equals(BigInteger.ONE) || aModq.equals(q.subtract(BigInteger.ONE)));
 		return a.multiply(a).mod(N);
 	}
-
 
 	public static BigInteger generate(PrintStream out, PrintStream privateKeyOut) {
 		Random rand = new Random();
@@ -93,7 +93,7 @@ public class RSA_POR_gen {
 			System.out.println("v: " + v);
 			System.out.println("len_N: " + len_N);
 		}
-		
+
 		return d;
 	}
 

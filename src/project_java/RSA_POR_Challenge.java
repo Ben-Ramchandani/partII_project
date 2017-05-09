@@ -46,8 +46,8 @@ public class RSA_POR_Challenge {
 		for (int i = 0; i < chunkSet.size(); i++) {
 
 			int chunkIndex = chunkSet.get(i);
-			System.err.print("Generating proof on chunk " + chunkIndex + " (" + (i + 1) + " out of "
-					+ chunkSet.size() + ").\r");
+			System.err.print("Generating proof on chunk " + chunkIndex + " (" + (i + 1) + " out of " + chunkSet.size()
+					+ ").\r");
 			BigInteger chunk = new BigInteger(1, parent.in.getChunk(chunkIndex));
 			BigInteger a = getCoefficient(chunkIndex);
 			BigInteger chunkTag = new BigInteger(tags.getChunk(chunkIndex));

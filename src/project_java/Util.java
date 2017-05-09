@@ -20,36 +20,37 @@ public final class Util {
 		kek.update(d);
 		return kek.digest();
 	}
-	
+
 	public static byte[] HMAC(byte[] key, byte[] m) {
-		// We can just concatenate the key with the message as KECCAK-256 is secure against length extension attacks (http://keccak.noekeon.org/).
+		// We can just concatenate the key with the message as KECCAK-256 is
+		// secure against length extension attacks (http://keccak.noekeon.org/).
 		return Util.hash(Util.byteCombine(key, m));
 	}
-	
+
 	public static BigInteger EVM_HMAC(byte[] i, byte[] k) {
-		assert(k.length == 32);
-		assert(i.length == 4);
+		assert (k.length == 32);
+		assert (i.length == 4);
 		byte[] hashTarget = Arrays.copyOf(k, 32);
-		for(int j=0;j<4;j++) {
-			hashTarget[j+28] = (byte) (hashTarget[j+28] ^ i[j]);
+		for (int j = 0; j < 4; j++) {
+			hashTarget[j + 28] = (byte) (hashTarget[j + 28] ^ i[j]);
 		}
 		return new BigInteger(1, Util.hash(hashTarget));
 	}
-	
+
 	public static BigInteger EVM_HMAC(int i, byte[] k) {
 		return Util.EVM_HMAC(Util.toBytes(i), k);
 	}
-	
+
 	public static byte[] toBytes(int x) {
-	    ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
-	    buffer.putInt(x);
-	    return buffer.array();
+		ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+		buffer.putInt(x);
+		return buffer.array();
 	}
-	
+
 	public static byte[] toBytes(long x) {
-	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-	    buffer.putLong(x);
-	    return buffer.array();
+		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+		buffer.putLong(x);
+		return buffer.array();
 	}
 
 	public static long leastGreaterPowerOf2(long x) {
@@ -67,7 +68,7 @@ public final class Util {
 			return (x / y) + 1;
 		}
 	}
-	
+
 	public static long divRoundUp(long x, long y) {
 		if (x % y == 0) {
 			return x / y;

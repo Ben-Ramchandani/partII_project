@@ -125,8 +125,8 @@ public class MerkleTest {
 		// Hash for ab^cd
 		byte[] hashLeft = Util.hash(Util.byteCombine(Util.hash("ab".getBytes()), Util.hash("cd".getBytes())));
 		// Hash for e_^__ where _ is the zero byte.
-		byte[] hashRight = Util.hash(
-				Util.byteCombine(Util.hash(Util.byteCombine("e".getBytes(), new byte[1])), Util.hash(new byte[2])));
+		byte[] hashRight = Util.hash(Util.byteCombine(Util.hash(Util.byteCombine("e".getBytes(), new byte[1])),
+				Util.hash(new byte[2])));
 		byte[] manualProof0 = Util.byteCombine("ab".getBytes(), Util.hash("cd".getBytes()), hashRight);
 		assertTrue(Arrays.equals(m.proof(0), manualProof0));
 		byte[] manualProof1 = Util.byteCombine("cd".getBytes(), Util.hash("ab".getBytes()), hashRight);
@@ -196,33 +196,34 @@ public class MerkleTest {
 
 	@Test
 	public void testBigFile() throws Exception {
-//		this.b = new ChunkStream(Paths.get(TEST_FILE_PATH + "big.file"), 1024);
-//		 //This takes 36 seconds to run, so is left disabled.
-//		 //It ends up taking about 16 seconds per gigabyte.
-//		 Merkle m = new Merkle(this.b);
-//		 System.out.println(m.toString());
-//		 System.out.println(DatatypeConverter.printHexBinary(m.rootHash()));
-//		 System.out.println(DatatypeConverter.printHexBinary(m.proof(93280)));
+		// this.b = new ChunkStream(Paths.get(TEST_FILE_PATH + "big.file"),
+		// 1024);
+		// //This takes 36 seconds to run, so is left disabled.
+		// //It ends up taking about 16 seconds per gigabyte.
+		// Merkle m = new Merkle(this.b);
+		// System.out.println(m.toString());
+		// System.out.println(DatatypeConverter.printHexBinary(m.rootHash()));
+		// System.out.println(DatatypeConverter.printHexBinary(m.proof(93280)));
 	}
 
 	@Test
 	public void testBigFileValidate() throws Exception {
-//		 //This takes about 60 seconds.
-//		 int chunkSize = 1024;
-//		 this.b = new ChunkStream(Paths.get(TEST_FILE_PATH + "big.file"),
-//		 chunkSize);
-//		 Merkle m = new Merkle(this.b);
-//		 int blockNumber = 4;
-//		 byte[] proof = m.proof(blockNumber);
-//		 byte[] rootHash = m.rootHash();
-//		 assertTrue(Merkle.validate(1024, rootHash, proof, blockNumber));
-//		 assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber + 1));
-//		 proof[1727]++;
-//		 assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber));
-//		 proof[1727]--;
-//		 assertTrue(Merkle.validate(1024, rootHash, proof, blockNumber));
-//		 rootHash[13]++;
-//		 assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber));
+		// //This takes about 60 seconds.
+		// int chunkSize = 1024;
+		// this.b = new ChunkStream(Paths.get(TEST_FILE_PATH + "big.file"),
+		// chunkSize);
+		// Merkle m = new Merkle(this.b);
+		// int blockNumber = 4;
+		// byte[] proof = m.proof(blockNumber);
+		// byte[] rootHash = m.rootHash();
+		// assertTrue(Merkle.validate(1024, rootHash, proof, blockNumber));
+		// assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber + 1));
+		// proof[1727]++;
+		// assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber));
+		// proof[1727]--;
+		// assertTrue(Merkle.validate(1024, rootHash, proof, blockNumber));
+		// rootHash[13]++;
+		// assertFalse(Merkle.validate(1024, rootHash, proof, blockNumber));
 	}
 
 }

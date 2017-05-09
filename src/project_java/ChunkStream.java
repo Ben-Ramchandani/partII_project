@@ -19,7 +19,7 @@ public class ChunkStream extends AChunkStream {
 		this.zeroArray = new byte[blockLen];
 		this.fileChunks = Util.divRoundUp(fileSize, this.chunkSize);
 	}
-	
+
 	public ChunkStream(String p, int blockLen) throws IOException {
 		this(Paths.get(p), blockLen);
 	}

@@ -20,8 +20,8 @@ public class Main {
 	public static final int chunkSize = 64;
 	// Must be less than 32
 	public static final int chunkSizeRSA = 16;
-	public static final String merkleContractSkeletonFile = "contract_multichunk.sol";
-	public static final String RSAContractSkeletonFile = "contract_RSA.sol";
+	public static final String merkleContractSkeletonFile = "contracts/contract_multichunk.sol";
+	public static final String RSAContractSkeletonFile = "contracts/contract_RSA.sol";
 	public static final String scriptSkeletonFile = "geth_script.js";
 	public static final String contractName = "FilePay";
 
@@ -161,6 +161,9 @@ public class Main {
 		}
 	}
 
+	/*
+	 * Helper functions
+	 */
 	public static byte[] parseBlockHash(String in) {
 		if (in.length() == 66) {
 			in = in.substring(2);
