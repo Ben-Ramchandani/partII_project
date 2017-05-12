@@ -22,7 +22,7 @@ public class Main {
 	public static final int chunkSizeRSA = 16;
 	public static final String merkleContractSkeletonFile = "contracts/contract_multichunk.sol";
 	public static final String RSAContractSkeletonFile = "contracts/contract_RSA.sol";
-	public static final String scriptSkeletonFile = "geth_script.js";
+	public static final String scriptSkeletonFile = "demo/demo_skeleton.js";
 	public static final String contractName = "FilePay";
 
 	public static void printUsage() {

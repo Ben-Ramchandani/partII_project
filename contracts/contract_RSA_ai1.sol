@@ -5,7 +5,7 @@ contract FilePay {
     uint validFromBlock;
     address owner;
     
-    function FilePay() {
+    function FilePay() payable {
         owner = msg.sender;
         validFromBlock = block.number PM_BLOCKS_BEFORE_VALID;
     }

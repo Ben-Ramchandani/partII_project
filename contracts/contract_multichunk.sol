@@ -4,7 +4,7 @@ contract FilePay {
     uint validFromBlock;
     address owner;
     
-    function FilePay() {
+    function FilePay() payable {
         owner = msg.sender;
         validFromBlock = block.number PM_BLOCKS_BEFORE_VALID;
     }
@@ -40,8 +40,8 @@ contract FilePay {
             }
             currentHash = sha3(currentHash);
         }
-        return 0;
-        /*suicide(msg.sender);*/
+        /*return 0;*/
+        suicide(msg.sender);
     }
     
     function recover() {
