@@ -2,6 +2,8 @@ bin/
 test_files/
 lib/
 *.jar
+demo/demo.js
+*.zip
 
 #Eclipse
 .project
