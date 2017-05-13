@@ -6,8 +6,11 @@
 @online{eth-yellowpaper,
     author = "Dr. Gavin Wood",
     title = "Ethereum Yellow Paper",
-    subtitle = "ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER",
     url = "https://ethereum.github.io/yellowpaper/paper.pdf"
+}
+@online{eth-homestead,
+    title     = "Ethereum Homestead Documentation",
+    url       = "http://www.ethdocs.org/en/latest/index.html",
 }
 @online{bitcoin-whitepaper,
     author="Satoshi Nakamoto",
@@ -19,10 +22,19 @@
     title="Blockchain: Simple Explanation",
     url="http://jrxv.net/x/16/chain.pdf"
 }
-@online{compact-por,
-    author="Hovav Shacham and Brent Waters",
-    title="Compact Proofs of Retrievability",
-    url="https://cseweb.ucsd.edu/~hovav/dist/verstore.pdf"
+@Article{compact-por,
+author="Shacham, Hovav
+and Waters, Brent",
+title="Compact Proofs of Retrievability",
+journal="Journal of Cryptology",
+year="2013",
+volume="26",
+number="3",
+pages="442--483",
+abstract="In a proof-of-retrievability system, a data storage center must prove to a verifier that he is actually storing all of a client's data. The central challenge is to build systems that are both efficient and provably secure---that is, it should be possible to extract the client's data from any prover that passes a verification check. In this paper, we give the first proof-of-retrievability schemes with full proofs of security against arbitrary adversaries in the strongest model, that of Juels and Kaliski.",
+issn="1432-1378",
+doi="10.1007/s00145-012-9129-2",
+url="https://cseweb.ucsd.edu/~hovav/dist/verstore.pdf"
 }
 @phdthesis{merkle-thesis,
     author="Ralph Charles Merkle",
@@ -38,22 +50,62 @@
 }
 @online{solidity-docs,
     title="Solidity Documentation",
-    url="https://solidity.readthedocs.io/en/develop/types.html"
+    url="https://solidity.readthedocs.io/en/develop/"
+}
+@online{solidity-docs-security,
+    title="Solidity Documentation -- Security Considerations",
+    url="https://solidity.readthedocs.io/en/develop/security-considerations.html"
 }
 @online{eip-ecc,
-    title="DRAFT: Precompiled contracts for elliptic curve addition and scalar multiplication",
+    title="Precompiled contracts for elliptic curve addition and scalar multiplication",
     url="https://github.com/ethereum/EIPs/issues/196"
+}
+@online{eip-rsa,
+    title="Ethereum: Precompiles for bigint arithmetic",
+    url="https://github.com/ethereum/EIPs/pull/198"
 }
 @online{java-hash,
     title="saphir-hash",
     license="Mix of BSD-like and MIT-like licenses",
     url="https://github.com/sfuhrm/saphir-hash"
 }
-@online{ecc-por,
-    title="PORs: Proofs of Retrievability for Large Files",
-    url="http://www.arijuels.com/wp-content/uploads/2013/09/JK07.pdf",
-    author="Ari Juels1 and Burton S. Kaliski Jr."
-}
+@inproceedings{ecc-por,
+ author = {Juels, Ari and Kaliski,Jr., Burton S.},
+ title = {Pors: Proofs of Retrievability for Large Files},
+ booktitle = {Proceedings of the 14th ACM Conference on Computer and Communications Security},
+ series = {CCS '07},
+ year = {2007},
+ isbn = {978-1-59593-703-2},
+ location = {Alexandria, Virginia, USA},
+ pages = {584--597},
+ numpages = {14},
+ url = {http://www.arijuels.com/wp-content/uploads/2013/09/JK07.pdf},
+ doi = {10.1145/1315245.1315317},
+ acmid = {1315317},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {proofs of knowledge, proofs of retrievability, storage security, storage systems},
+} 
+@article{rsa-por,
+ author = {Ateniese, Giuseppe and Burns, Randal and Curtmola, Reza and Herring, Joseph and Khan, Osama and Kissner, Lea and Peterson, Zachary and Song, Dawn},
+ title = {Remote Data Checking Using Provable Data Possession},
+ journal = {ACM Trans. Inf. Syst. Secur.},
+ issue_date = {May 2011},
+ volume = {14},
+ number = {1},
+ month = jun,
+ year = {2011},
+ issn = {1094-9224},
+ pages = {12:1--12:34},
+ articleno = {12},
+ numpages = {34},
+ url = {https://pdfs.semanticscholar.org/1deb/0df1b2075f9570041471b8bd76df501dac86.pdf},
+ doi = {10.1145/1952982.1952994},
+ acmid = {1952994},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {PDP, Remote data checking, archival storage, cloud storage security, erasure coding, homomorphic verifiable tags, provable data possession, robust auditing},
+} 
 @online{swarm-swear-swindle,
     title="Swap, Swear and Swindle",
     subtitle="incentive system for swarm",
@@ -75,6 +127,6 @@
     url="http://filecoin.io/filecoin.pdf"
 }
 @online{browser-solidity,
-    title="Remix -- Browser Solidity",
+    title="Remix: browser-based Solidity IDE",
     url="https://ethereum.github.io/browser-solidity/"
 }
