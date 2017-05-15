@@ -16,6 +16,8 @@ personal.unlockAccount(secondary, "");
 
 console.log("Sending 1 ether to secondary");
 eth.sendTransaction({from: coinbase, to: secondary, value: web3.toWei(1.0, "ether")});
+console.log("Mining 1 block");
+miner.start(); admin.sleepBlocks(1); miner.stop();
 
 if(web3.fromWei(eth.getBalance(secondary), "ether") != 1.0) {
     console.error("Balance is not 1 ether.");
